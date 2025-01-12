@@ -1,0 +1,23 @@
+import { ThemeProvider } from "styled-components";
+
+const theme = {
+  colors: {
+    timberwolf: "#DAD7CD",
+    sage: "#A3B18A",
+    fernGreen: "#5C865B",
+    hunterGreen: "#3A5A40",
+    brunswickGreen: "#344E41",
+  },
+  fonts: ["sans-serif", "Roboto"],
+  fontSizes: {
+    small: "1em",
+    medium: "1.5em",
+    large: "2em",
+  },
+};
+
+const Theme = ({ children }: { children: JSX.Element[] }) => (
+  <ThemeProvider theme={theme}>{children}</ThemeProvider>
+);
+
+export default Theme;
