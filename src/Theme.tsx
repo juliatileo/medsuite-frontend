@@ -7,6 +7,10 @@ const theme = {
     fernGreen: "#5C865B",
     hunterGreen: "#3A5A40",
     brunswickGreen: "#344E41",
+    seasalt: "#F6F6F6",
+    white: "#FEFEFE",
+    jet: "#333333",
+    battleshipGray: "#999999",
   },
   fonts: ["sans-serif", "Roboto"],
   fontSizes: {

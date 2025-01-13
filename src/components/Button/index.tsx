@@ -1,7 +1,7 @@
 import { ButtonBody, ButtonText } from "./styles";
 import { ButtonProps } from "./types";
 
-function Button(props: ButtonProps) {
+function Button(props: ButtonProps): JSX.Element {
   return (
     <ButtonBody
       height={props.height}
