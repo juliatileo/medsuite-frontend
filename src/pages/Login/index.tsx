@@ -1,11 +1,33 @@
+import { useState } from "react";
+import { Link, redirect } from "react-router";
+
 import Input from "components/Input";
 import Button from "components/Button";
+import { LoginParams, UserType } from "config/api/dto";
+import api from "config/api";
+import session from "config/session";
+
 import { LoginContainer, LoginCreateAccount } from "./styles";
-import { useState } from "react";
-import { LoginParams } from "./types";
 
 function Login(): JSX.Element {
   const [loginParams, setLoginParams] = useState<LoginParams>({});
+
+  async function login() {
+    await api
+      .login(loginParams)
+      .then((res) => {
+        redirect("/");
+
+        if (res.data.user.type === UserType.DOCTOR) {
+          session.logInAsDoctor(res.data.user, res.data.token);
+        } else {
+          session.logInAsPatient(res.data.user, res.data.token);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
 
   return (
     <LoginContainer>
@@ -32,13 +54,16 @@ function Login(): JSX.Element {
         text="LOGIN"
         width="350px"
         height="65px"
-        onClick={() => {
-          console.log(loginParams);
+        onClick={async () => {
+          await login();
         }}
       />
       <LoginCreateAccount>
         Ainda não tem uma conta? Faça seu{" "}
-        <LoginCreateAccount green="true">registro</LoginCreateAccount>.
+        <LoginCreateAccount green="true">
+          <Link to={"/register"}>registro</Link>
+        </LoginCreateAccount>
+        .
       </LoginCreateAccount>
     </LoginContainer>
   );
