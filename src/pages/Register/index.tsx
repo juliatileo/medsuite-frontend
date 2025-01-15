@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, redirect } from "react-router";
 
 import Input from "components/Input";
 import Button from "components/Button";
+
 import { RegisterParams } from "config/api/dto";
+import api from "config/api";
+import session from "config/session";
 
 import {
   RegisterContainer,
@@ -13,6 +16,19 @@ import {
 
 function Register(): JSX.Element {
   const [registerParams, setRegisterParams] = useState<RegisterParams>({});
+
+  async function registerUser() {
+    await api
+      .saveUser(registerParams)
+      .then((res) => {
+        redirect("/");
+
+        session.logInAsPatient(res.data.user, res.data.token);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
 
   return (
     <RegisterContainer>
@@ -63,7 +79,7 @@ function Register(): JSX.Element {
         width="350px"
         height="65px"
         onClick={() => {
-          console.log(registerParams);
+          registerUser();
         }}
       />
       <RegisterCreateAccount>

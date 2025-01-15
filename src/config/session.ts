@@ -10,6 +10,12 @@ class Session {
   isDoctor = () => localStorage.getItem("isDoctor") !== null;
 
   logInAsPatient(user: UserEntity, token: string) {
+    console.log(
+      localStorage.getItem("session") === null,
+      userSecret,
+      tokenSecret
+    );
+
     if (localStorage.getItem("session") === null && userSecret && tokenSecret) {
       const encrypted = CryptoJS.AES.encrypt(
         JSON.stringify(user),
@@ -22,7 +28,7 @@ class Session {
       ).toString();
       localStorage.setItem("token", encryptedToken);
       localStorage.setItem("isClient", "true");
-      window.location.reload();
+      // window.location.reload();
     }
   }
 
@@ -61,16 +67,16 @@ class Session {
         } catch (err) {
           this.logOut(err as Error);
         }
-      } else this.logOut();
-    } else this.logOut();
+      } else this.logOut(new Error("aquiee"));
+    } else this.logOut(new Error("aquie"));
   }
 
   getToken() {
     if (
+      (localStorage.getItem("isClient") !== null ||
+        localStorage.getItem("isDoctor") !== null) &&
       localStorage.getItem("token") !== null &&
-      localStorage.getItem("isClient") !== null &&
-      localStorage.getItem("isDoctor") !== null &&
-      tokenSecret
+      tokenSecret !== null
     ) {
       const encrypted = localStorage.getItem("token");
 
@@ -84,8 +90,8 @@ class Session {
           this.logOut(err as Error);
           redirect("/");
         }
-      } else this.logOut();
-    } else this.logOut();
+      } else this.logOut(new Error("aqui talvez"));
+    } else this.logOut(new Error("aqui"));
   }
 
   logOut(err?: Error) {
