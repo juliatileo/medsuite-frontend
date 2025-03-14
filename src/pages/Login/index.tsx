@@ -32,39 +32,39 @@ function Login(): JSX.Element {
   return (
     <LoginContainer>
       <h2>Complete seu login para usufruir das nossas soluções em saúde</h2>
-      <Input
-        placeholder="E-mail"
-        height="50px"
-        width="600px"
-        type="text"
-        onChange={(res) =>
-          setLoginParams({ ...loginParams, email: res.target.value })
-        }
-      />
-      <Input
-        placeholder="Senha"
-        height="50px"
-        width="600px"
-        type="password"
-        onChange={(res) =>
-          setLoginParams({ ...loginParams, password: res.target.value })
-        }
-      />
-      <Button
-        text="LOGIN"
-        width="350px"
-        height="65px"
-        onClick={async () => {
+      <form
+        onSubmit={async (res) => {
+          res.preventDefault();
           await login();
         }}
-      />
-      <LoginCreateAccount>
-        Ainda não tem uma conta? Faça seu{" "}
-        <LoginCreateAccount green="true">
-          <Link to={"/register"}>registro</Link>
+      >
+        <Input
+          placeholder="E-mail"
+          height="50px"
+          width="600px"
+          type="text"
+          onChange={(res) =>
+            setLoginParams({ ...loginParams, email: res.target.value })
+          }
+        />
+        <Input
+          placeholder="Senha"
+          height="50px"
+          width="600px"
+          type="password"
+          onChange={(res) =>
+            setLoginParams({ ...loginParams, password: res.target.value })
+          }
+        />
+        <Button text="LOGIN" width="350px" height="65px" onClick={() => {}} />
+        <LoginCreateAccount>
+          Ainda não tem uma conta? Faça seu{" "}
+          <LoginCreateAccount green="true">
+            <Link to={"/register"}>registro</Link>
+          </LoginCreateAccount>
+          .
         </LoginCreateAccount>
-        .
-      </LoginCreateAccount>
+      </form>
     </LoginContainer>
   );
 }

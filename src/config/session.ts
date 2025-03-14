@@ -28,7 +28,7 @@ class Session {
       ).toString();
       localStorage.setItem("token", encryptedToken);
       localStorage.setItem("isClient", "true");
-      // window.location.reload();
+      window.location.reload();
     }
   }
 

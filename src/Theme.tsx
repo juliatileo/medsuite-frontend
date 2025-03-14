@@ -4,7 +4,7 @@ const theme = {
   colors: {
     timberwolf: "#DAD7CD",
     sage: "#A3B18A",
-    fernGreen: "#5C865B",
+    fernGreen: "#588157",
     hunterGreen: "#3A5A40",
     brunswickGreen: "#344E41",
     seasalt: "#F6F6F6",

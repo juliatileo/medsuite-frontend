@@ -18,6 +18,13 @@ export const LoginContainer = styled.div`
     margin-top: 25px;
   }
 
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
   :last-child {
     margin-bottom: 0;
   }
