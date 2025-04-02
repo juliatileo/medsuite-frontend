@@ -1,8 +1,14 @@
-import axios, { AxiosInstance, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 
 import session from "config/session";
 
-import { LoginParams, LoginResponse, RegisterParams } from "./dto";
+import {
+  AppointmentEntity,
+  LoginParams,
+  LoginResponse,
+  RegisterParams,
+} from "./dto";
+import { DateTime } from "luxon";
 
 class API {
   private api: AxiosInstance;
@@ -12,14 +18,55 @@ class API {
       baseURL: "http://localhost:3333/api/",
       headers: { Authorization: `Bearer ${session?.getToken() || ""}` },
     });
+
+    this.api.interceptors.response.use(
+      (response) => response,
+      (error: AxiosError) => {
+        console.log(error);
+
+        if (error.status === 401) {
+          session.logOut();
+        }
+
+        return Promise.reject(error);
+      }
+    );
   }
 
+  // USER
   async login(body: LoginParams): Promise<AxiosResponse<LoginResponse>> {
     return this.api.put("user/login", body);
   }
 
   async saveUser(body: RegisterParams): Promise<AxiosResponse<LoginResponse>> {
     return this.api.post("user", body);
+  }
+
+  // APPOINTMENT
+  async saveAppointment(
+    body: Partial<AppointmentEntity>
+  ): Promise<AxiosResponse<AppointmentEntity>> {
+    return this.api.post("appointment", body);
+  }
+
+  async listAppointmentsByDoctorId(
+    doctorId: string
+  ): Promise<AxiosResponse<AppointmentEntity[]>> {
+    return this.api.get(`appointment/doctor/${doctorId}`);
+  }
+
+  async listAppointmentsByPatientId(
+    patientId: string
+  ): Promise<AxiosResponse<AppointmentEntity[]>> {
+    return this.api.get(`appointment/patient/${patientId}`);
+  }
+
+  async listAppointmentsByDate(
+    date: Date
+  ): Promise<AxiosResponse<AppointmentEntity[]>> {
+    return this.api.get("appointment/date", {
+      params: { date: DateTime.fromJSDate(date).toISO() },
+    });
   }
 }
 

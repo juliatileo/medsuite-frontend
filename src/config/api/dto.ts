@@ -4,11 +4,20 @@ export enum UserType {
 }
 
 export interface UserEntity {
+  id: string;
   name: string;
   cellphone: string;
   email: string;
   password: string;
   type: UserType;
+}
+
+export interface AppointmentEntity {
+  id: string;
+  date: string;
+  description: string;
+  patientId: string;
+  doctorId: string;
 }
 
 export interface LoginParams {

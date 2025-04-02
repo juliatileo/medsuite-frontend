@@ -34,7 +34,7 @@ function Header() {
       <Drawer open={open} onClose={toggleDrawer(false)}>
         <DrawerContainer>
           {links.map((link) => (
-            <LinkContainer>
+            <LinkContainer key={link.name}>
               {link.icon}
               <Link to={link.url}> {link.name}</Link>
             </LinkContainer>

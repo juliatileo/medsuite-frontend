@@ -11,11 +11,11 @@ function Router() {
     <BrowserRouter>
       {session.isAuthenticated() ? (
         <Routes>
-          <Route index element={<Home />} />
+          <Route path="*" element={<Home />} />
         </Routes>
       ) : (
         <Routes>
-          <Route index element={<Login />} />
+          <Route path="*" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Routes>
       )}
