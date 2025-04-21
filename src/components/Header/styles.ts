@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 export const HeaderBody = styled.header`
-  background-color: #a3b18a;
+  background-color: ${(props) => props.theme.colors.fernGreen};
   width: 100vw;
   height: 70px;
   border-bottom: 2px solid ${(props) => props.theme.colors.timberwolf};
@@ -46,4 +46,7 @@ export const LinkContainer = styled.div`
   font-weight: 500;
   font-size: 18px;
   row-gap: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;

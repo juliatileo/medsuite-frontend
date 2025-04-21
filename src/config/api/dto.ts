@@ -10,6 +10,7 @@ export interface UserEntity {
   email: string;
   password: string;
   type: UserType;
+  createdAt: string;
 }
 
 export interface AppointmentEntity {

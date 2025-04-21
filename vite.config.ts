@@ -10,6 +10,7 @@ export default defineConfig({
       layouts: "/src/layouts",
       pages: "/src/pages",
       config: "/src/config",
+      utils: "/src/utils",
     },
   },
 });

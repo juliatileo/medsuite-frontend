@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { Drawer } from "@mui/material";
-import { FiMenu, FiHome } from "react-icons/fi";
+import { FaBars, FaHome, FaUser, FaHospital } from "react-icons/fa";
 
 import session from "config/session";
 
@@ -20,12 +20,21 @@ function Header() {
   };
 
   const links: { url: string; name: string; icon: JSX.Element }[] = [
-    { url: "/", name: "Home", icon: <FiHome size={20} /> },
+    { url: "/", name: "Home", icon: <FaHome size={20} /> },
+    { url: "/appointments", name: "Consultas", icon: <FaHospital size={18} /> },
   ];
+
+  if (session.isDoctor()) {
+    links.splice(1, 0, {
+      url: "/patients",
+      name: "Pacientes",
+      icon: <FaUser size={18} />,
+    });
+  }
 
   return (
     <HeaderBody>
-      <FiMenu
+      <FaBars
         color="#fefefe"
         size={45}
         cursor="pointer"

@@ -19,30 +19,12 @@ import { CalendarContainer } from "./styles";
 
 function Home() {
   const [appointments, setAppointments] = useState<AppointmentEntity[]>([]);
-  const [todayAppointments, setTodayAppointments] = useState<
-    AppointmentEntity[]
-  >([]);
+
   const [user, setUser] = useState<UserEntity | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     setUser(session.getUserInfo() as UserEntity);
-
-    async function getTodayAppointments() {
-      await api
-        .listAppointmentsByDate(new Date())
-        .then((res) => {
-          setTodayAppointments(res.data);
-        })
-        .catch((error) => {
-          console.log(error);
-        })
-        .finally(() => {
-          setLoading(false);
-        });
-    }
-
-    getTodayAppointments();
   }, []);
 
   useEffect(() => {
