@@ -38,11 +38,10 @@ export const LogOutContainer = styled.div`
 `;
 
 export const LinkContainer = styled.div`
-  width: 30%;
+  width: 40%;
   height: 75px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   font-weight: 500;
   font-size: 18px;
   row-gap: 50px;

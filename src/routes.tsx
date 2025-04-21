@@ -12,6 +12,7 @@ function Router() {
       {session.isAuthenticated() ? (
         <Routes>
           <Route path="*" element={<Home />} />
+          <Route path="/patients" element={<span>fodase</span>} />
         </Routes>
       ) : (
         <Routes>

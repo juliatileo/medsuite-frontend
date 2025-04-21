@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { Drawer } from "@mui/material";
-import { FiMenu, FiHome } from "react-icons/fi";
+import { FiMenu, FiHome, FiUser } from "react-icons/fi";
 
 import session from "config/session";
 
@@ -21,6 +21,7 @@ function Header() {
 
   const links: { url: string; name: string; icon: JSX.Element }[] = [
     { url: "/", name: "Home", icon: <FiHome size={20} /> },
+    { url: "/patients", name: "Pacientes", icon: <FiUser size={20} /> },
   ];
 
   return (
