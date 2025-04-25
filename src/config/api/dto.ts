@@ -3,6 +3,14 @@ export enum UserType {
   DOCTOR = 2,
 }
 
+export interface PatientInfoEntity {
+  birth: string;
+  height: number;
+  weight: number;
+  bloodType: string;
+  sex: "M" | "F";
+  userId: string;
+}
 export interface UserEntity {
   id: string;
   name: string;
@@ -11,6 +19,7 @@ export interface UserEntity {
   password: string;
   type: UserType;
   createdAt: string;
+  patientInfo?: PatientInfoEntity;
 }
 
 export interface AppointmentEntity {

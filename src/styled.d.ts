@@ -12,6 +12,7 @@ declare module "styled-components" {
       white: string;
       jet: string;
       battleshipGray: string;
+      antiFlashWhite: string;
     };
     fonts: string[];
     fontSizes: {

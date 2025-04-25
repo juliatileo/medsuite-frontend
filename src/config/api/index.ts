@@ -47,6 +47,10 @@ class API {
     return this.api.get("user/patients");
   }
 
+  async getUserById(id: string): Promise<AxiosResponse<UserEntity>> {
+    return this.api.get(`user/${id}`);
+  }
+
   // APPOINTMENT
   async saveAppointment(
     body: Partial<AppointmentEntity>

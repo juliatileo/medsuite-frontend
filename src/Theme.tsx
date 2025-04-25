@@ -11,6 +11,7 @@ const theme = {
     white: "#FEFEFE",
     jet: "#333333",
     battleshipGray: "#999999",
+    antiFlashWhite: "#F1F1F1",
   },
   fonts: ["sans-serif", "Roboto"],
   fontSizes: {
