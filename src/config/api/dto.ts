@@ -4,7 +4,8 @@ export enum UserType {
 }
 
 export interface PatientInfoEntity {
-  birth: string;
+  id: string;
+  birthDate: string;
   height: number;
   weight: number;
   bloodType: string;

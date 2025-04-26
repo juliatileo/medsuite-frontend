@@ -9,7 +9,8 @@ function Input(props: InputProps): JSX.Element {
       height={props.height}
       onChange={props.onChange}
       type={props.type}
-      center={props.center || false}
+      center={props.center === "true" ? true : false}
+      value={props.value}
     />
   );
 }

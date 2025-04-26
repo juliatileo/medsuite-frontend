@@ -4,5 +4,6 @@ export interface InputProps {
   width: string;
   type: string;
   onChange: (res: React.ChangeEvent<HTMLInputElement>) => void;
-  center?: boolean;
+  center?: string;
+  value?: string;
 }

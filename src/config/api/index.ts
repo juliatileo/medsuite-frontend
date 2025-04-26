@@ -43,6 +43,12 @@ class API {
     return this.api.post("user", body);
   }
 
+  async updateUser(
+    body: Partial<UserEntity>
+  ): Promise<AxiosResponse<UserEntity>> {
+    return this.api.put("user", body);
+  }
+
   async listPatients(): Promise<AxiosResponse<UserEntity[]>> {
     return this.api.get("user/patients");
   }
