@@ -31,6 +31,21 @@ function Patients() {
   const [selectedPatientId, setSelectedPatientId] = useState<string | null>(
     null
   );
+  const [patient, setPatient] = useState<UserEntity | null>({
+    name: "",
+    password: "",
+    email: "",
+    cellphone: "",
+    type: 1,
+    firstAccess: true,
+    patientInfo: {
+      birthDate: "",
+      bloodType: "",
+      height: 0,
+      weight: 0,
+      sex: "",
+    },
+  });
 
   const handleOpenEditPatient = () => setOpenEditPatient(true);
   const handleCloseEditPatient = () => {
@@ -77,15 +92,23 @@ function Patients() {
     }
 
     getUserById();
-  }, [selectedPatientId]);
+  }, [selectedPatientId, setSelectedPatient]);
 
-  function handleEditPatient(
-    res: React.ChangeEvent<HTMLInputElement>,
-    field: string,
-    patientInfoField?: boolean
-  ): void {
+  function handleEditPatient({
+    res,
+    field,
+    patientInfoField,
+    createPatient = false,
+  }: {
+    res: React.ChangeEvent<HTMLInputElement>;
+    field: string;
+    patientInfoField?: boolean;
+    createPatient?: boolean;
+  }): void {
+    const setFunc = createPatient ? setPatient : setSelectedPatient;
+
     if (patientInfoField) {
-      setSelectedPatient((prev) => {
+      setFunc((prev) => {
         if (!prev || !prev.patientInfo) return null;
 
         return {
@@ -97,7 +120,7 @@ function Patients() {
         };
       });
     } else
-      setSelectedPatient((prev) => {
+      setFunc((prev) => {
         if (!prev) return null;
 
         return {
@@ -113,6 +136,52 @@ function Patients() {
 
       await getPatients();
     }
+  }
+
+  function validateUserEntity(user: UserEntity): boolean {
+    if (!user.name || user.name.trim() === "") return false;
+    if (!user.password || user.password.trim() === "") return false;
+    if (!user.email || user.email.trim() === "") return false;
+    if (!user.cellphone || user.cellphone.trim() === "") return false;
+    if (user.type === undefined || user.type === null) return false;
+
+    if (!user.patientInfo) return false;
+    if (!user.patientInfo.birthDate || user.patientInfo.birthDate.trim() === "")
+      return false;
+    if (!user.patientInfo.bloodType || user.patientInfo.bloodType.trim() === "")
+      return false;
+    if (!user.patientInfo.height || user.patientInfo.height <= 0) return false;
+    if (!user.patientInfo.weight || user.patientInfo.weight <= 0) return false;
+    if (!user.patientInfo.sex || user.patientInfo.sex.trim() === "")
+      return false;
+
+    return true;
+  }
+
+  async function handleCreatePatient(createPatient: UserEntity): Promise<void> {
+    if (!validateUserEntity(createPatient)) {
+      return;
+    }
+
+    await api.saveUser(createPatient);
+
+    setPatient({
+      name: "",
+      password: "",
+      email: "",
+      cellphone: "",
+      type: 1,
+      firstAccess: true,
+      patientInfo: {
+        birthDate: "",
+        bloodType: "",
+        height: 0,
+        weight: 0,
+        sex: "",
+      },
+    });
+
+    await getPatients();
   }
 
   return (
@@ -146,13 +215,15 @@ function Patients() {
                 <PatientName>{abbreviateName(patient.name)}</PatientName>
                 <DateContainer>
                   <span>
-                    {DateTime.fromISO(patient.createdAt).toFormat("dd/MM/yyyy")}
+                    {DateTime.fromISO(patient.createdAt!).toFormat(
+                      "dd/MM/yyyy"
+                    )}
                   </span>
                   <FaEye
                     size={18}
                     style={{ cursor: "pointer" }}
                     onClick={() => {
-                      setSelectedPatientId(patient.id);
+                      setSelectedPatientId(patient.id!);
                       handleOpenEditPatient();
                     }}
                   />
@@ -175,7 +246,7 @@ function Patients() {
                   type="text"
                   center="false"
                   onChange={(res) => {
-                    handleEditPatient(res, "name");
+                    handleEditPatient({ res, field: "name" });
                   }}
                 />
                 <Input
@@ -188,7 +259,7 @@ function Patients() {
                   type="text"
                   center="false"
                   onChange={(res) => {
-                    handleEditPatient(res, "cellphone");
+                    handleEditPatient({ res, field: "cellphone" });
                   }}
                 />
                 <Input
@@ -199,7 +270,7 @@ function Patients() {
                   type="text"
                   center="false"
                   onChange={(res) => {
-                    handleEditPatient(res, "email");
+                    handleEditPatient({ res, field: "email" });
                   }}
                 />
                 <Input
@@ -216,7 +287,11 @@ function Patients() {
                   type="date"
                   center="false"
                   onChange={(res) => {
-                    handleEditPatient(res, "birthDate", true);
+                    handleEditPatient({
+                      res,
+                      field: "birthDate",
+                      patientInfoField: true,
+                    });
                   }}
                 />
                 <Input
@@ -231,7 +306,11 @@ function Patients() {
                   type="number"
                   center="true"
                   onChange={(res) => {
-                    handleEditPatient(res, "height", true);
+                    handleEditPatient({
+                      res,
+                      field: "height",
+                      patientInfoField: true,
+                    });
                   }}
                 />
                 <Input
@@ -246,7 +325,11 @@ function Patients() {
                   type="number"
                   center="true"
                   onChange={(res) => {
-                    handleEditPatient(res, "weight", true);
+                    handleEditPatient({
+                      res,
+                      field: "weight",
+                      patientInfoField: true,
+                    });
                   }}
                 />
                 <Input
@@ -261,7 +344,11 @@ function Patients() {
                   type="text"
                   center="true"
                   onChange={(res) => {
-                    handleEditPatient(res, "bloodType", true);
+                    handleEditPatient({
+                      res,
+                      field: "bloodType",
+                      patientInfoField: true,
+                    });
                   }}
                 />
                 <Input
@@ -276,7 +363,11 @@ function Patients() {
                   type="text"
                   center="true"
                   onChange={(res) => {
-                    handleEditPatient(res, "sex", true);
+                    handleEditPatient({
+                      res,
+                      field: "sex",
+                      patientInfoField: true,
+                    });
                   }}
                 />
               </ModalInputsContainer>
@@ -300,7 +391,13 @@ function Patients() {
                   height="60px"
                   type="text"
                   center="false"
-                  onChange={() => {}}
+                  onChange={(res) => {
+                    handleEditPatient({
+                      res,
+                      field: "name",
+                      createPatient: true,
+                    });
+                  }}
                 />
                 <Input
                   placeholder="Telefone"
@@ -308,7 +405,13 @@ function Patients() {
                   height="60px"
                   type="text"
                   center="false"
-                  onChange={() => {}}
+                  onChange={(res) => {
+                    handleEditPatient({
+                      res,
+                      field: "cellphone",
+                      createPatient: true,
+                    });
+                  }}
                 />
                 <Input
                   placeholder="E-mail"
@@ -316,7 +419,13 @@ function Patients() {
                   height="60px"
                   type="text"
                   center="false"
-                  onChange={() => {}}
+                  onChange={(res) => {
+                    handleEditPatient({
+                      res,
+                      field: "email",
+                      createPatient: true,
+                    });
+                  }}
                 />
                 <Input
                   placeholder="Data de nascimento"
@@ -324,39 +433,88 @@ function Patients() {
                   height="60px"
                   type="date"
                   center="false"
-                  onChange={() => {}}
+                  onChange={(res) => {
+                    handleEditPatient({
+                      res,
+                      field: "birthDate",
+                      patientInfoField: true,
+                      createPatient: true,
+                    });
+                  }}
                 />
                 <Input
-                  placeholder="Altura"
-                  width="150px"
+                  placeholder="Senha"
+                  width="580px"
                   height="60px"
-                  type="number"
-                  center="true"
-                  onChange={() => {}}
-                />
-                <Input
-                  placeholder="Peso"
-                  width="150px"
-                  height="60px"
-                  type="number"
-                  center="true"
-                  onChange={() => {}}
+                  type="password"
+                  center="false"
+                  onChange={(res) => {
+                    handleEditPatient({
+                      res,
+                      field: "password",
+                      createPatient: true,
+                    });
+                  }}
                 />
                 <Input
                   placeholder="Tipo sanguíneo"
-                  width="150px"
+                  width="330px"
                   height="60px"
                   type="text"
                   center="true"
-                  onChange={() => {}}
+                  onChange={(res) => {
+                    handleEditPatient({
+                      res,
+                      field: "bloodType",
+                      patientInfoField: true,
+                      createPatient: true,
+                    });
+                  }}
+                />
+                <Input
+                  placeholder="Altura"
+                  width="270px"
+                  height="60px"
+                  type="number"
+                  center="true"
+                  onChange={(res) => {
+                    handleEditPatient({
+                      res,
+                      field: "height",
+                      patientInfoField: true,
+                      createPatient: true,
+                    });
+                  }}
+                />
+                <Input
+                  placeholder="Peso"
+                  width="270px"
+                  height="60px"
+                  type="number"
+                  center="true"
+                  onChange={(res) => {
+                    handleEditPatient({
+                      res,
+                      field: "weight",
+                      patientInfoField: true,
+                      createPatient: true,
+                    });
+                  }}
                 />
                 <Input
                   placeholder="Sexo"
-                  width="150px"
+                  width="270px"
                   height="60px"
                   type="text"
                   center="true"
-                  onChange={() => {}}
+                  onChange={(res) => {
+                    handleEditPatient({
+                      res,
+                      field: "sex",
+                      patientInfoField: true,
+                      createPatient: true,
+                    });
+                  }}
                 />
               </ModalInputsContainer>
               <Button
@@ -364,7 +522,13 @@ function Patients() {
                 width="280px"
                 height="50px"
                 onClick={() => {
-                  handleCloseCreatePatient();
+                  console.log(patient);
+
+                  if (patient) {
+                    handleCreatePatient(patient).then(() => {
+                      handleCloseCreatePatient();
+                    });
+                  }
                 }}
               />
             </ModalContainer>

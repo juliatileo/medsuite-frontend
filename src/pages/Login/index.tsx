@@ -58,9 +58,9 @@ function Login(): JSX.Element {
         />
         <Button text="LOGIN" width="350px" height="65px" onClick={() => {}} />
         <LoginCreateAccount>
-          Ainda não tem uma conta? Faça seu{" "}
+          Esqueceu sua senha?{" "}
           <LoginCreateAccount green="true">
-            <Link to={"/register"}>registro</Link>
+            <Link to={"/forgot-password"}>Recupere aqui</Link>
           </LoginCreateAccount>
           .
         </LoginCreateAccount>

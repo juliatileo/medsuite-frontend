@@ -4,22 +4,23 @@ export enum UserType {
 }
 
 export interface PatientInfoEntity {
-  id: string;
+  id?: string;
   birthDate: string;
   height: number;
   weight: number;
   bloodType: string;
-  sex: "M" | "F";
-  userId: string;
+  sex: "M" | "F" | "";
+  userId?: string;
 }
 export interface UserEntity {
-  id: string;
+  id?: string;
   name: string;
   cellphone: string;
   email: string;
   password: string;
   type: UserType;
-  createdAt: string;
+  firstAccess?: boolean;
+  createdAt?: string;
   patientInfo?: PatientInfoEntity;
 }
 
@@ -39,11 +40,4 @@ export interface LoginParams {
 export interface LoginResponse {
   user: UserEntity;
   token: string;
-}
-
-export interface RegisterParams {
-  name?: string;
-  email?: string;
-  password?: string;
-  cellphone?: string;
 }

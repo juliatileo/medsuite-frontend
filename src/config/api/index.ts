@@ -6,7 +6,6 @@ import {
   AppointmentEntity,
   LoginParams,
   LoginResponse,
-  RegisterParams,
   UserEntity,
 } from "./dto";
 import { DateTime } from "luxon";
@@ -39,7 +38,7 @@ class API {
     return this.api.put("user/login", body);
   }
 
-  async saveUser(body: RegisterParams): Promise<AxiosResponse<LoginResponse>> {
+  async saveUser(body: UserEntity): Promise<AxiosResponse<LoginResponse>> {
     return this.api.post("user", body);
   }
 
