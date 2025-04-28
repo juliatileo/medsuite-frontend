@@ -6,9 +6,11 @@ import { DateTime } from "luxon";
 import Button from "components/Button";
 import Input from "components/Input";
 import Header from "components/Header";
+import Select from "components/Select";
 import api from "config/api";
 import { UserEntity } from "config/api/dto";
 import { abbreviateName } from "utils/abbreviateName";
+import { bloodTypes, sexes } from "utils/types";
 
 import {
   CreatePatientButton,
@@ -100,7 +102,9 @@ function Patients() {
     patientInfoField,
     createPatient = false,
   }: {
-    res: React.ChangeEvent<HTMLInputElement>;
+    res:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLSelectElement>;
     field: string;
     patientInfoField?: boolean;
     createPatient?: boolean;
@@ -332,8 +336,7 @@ function Patients() {
                     });
                   }}
                 />
-                <Input
-                  placeholder="Tipo sanguíneo"
+                <Select
                   value={
                     selectedPatient?.patientInfo?.bloodType
                       ? selectedPatient.patientInfo.bloodType.toString()
@@ -341,7 +344,6 @@ function Patients() {
                   }
                   width="150px"
                   height="60px"
-                  type="text"
                   center="true"
                   onChange={(res) => {
                     handleEditPatient({
@@ -350,9 +352,9 @@ function Patients() {
                       patientInfoField: true,
                     });
                   }}
+                  options={bloodTypes}
                 />
-                <Input
-                  placeholder="Sexo"
+                <Select
                   value={
                     selectedPatient?.patientInfo?.sex
                       ? selectedPatient.patientInfo.sex.toString()
@@ -360,7 +362,6 @@ function Patients() {
                   }
                   width="150px"
                   height="60px"
-                  type="text"
                   center="true"
                   onChange={(res) => {
                     handleEditPatient({
@@ -369,6 +370,7 @@ function Patients() {
                       patientInfoField: true,
                     });
                   }}
+                  options={sexes}
                 />
               </ModalInputsContainer>
               <Button
@@ -456,11 +458,10 @@ function Patients() {
                     });
                   }}
                 />
-                <Input
-                  placeholder="Tipo sanguíneo"
+                <Select
+                  value="Selecione o tipo sanguíneo"
                   width="330px"
                   height="60px"
-                  type="text"
                   center="true"
                   onChange={(res) => {
                     handleEditPatient({
@@ -470,6 +471,7 @@ function Patients() {
                       createPatient: true,
                     });
                   }}
+                  options={bloodTypes}
                 />
                 <Input
                   placeholder="Altura"
@@ -501,13 +503,14 @@ function Patients() {
                     });
                   }}
                 />
-                <Input
-                  placeholder="Sexo"
+                <Select
+                  value="Selecione o sexo"
                   width="270px"
                   height="60px"
-                  type="text"
                   center="true"
                   onChange={(res) => {
+                    console.log(res.target.value);
+
                     handleEditPatient({
                       res,
                       field: "sex",
@@ -515,6 +518,7 @@ function Patients() {
                       createPatient: true,
                     });
                   }}
+                  options={sexes}
                 />
               </ModalInputsContainer>
               <Button
@@ -522,8 +526,6 @@ function Patients() {
                 width="280px"
                 height="50px"
                 onClick={() => {
-                  console.log(patient);
-
                   if (patient) {
                     handleCreatePatient(patient).then(() => {
                       handleCloseCreatePatient();
