@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import { Drawer } from "@mui/material";
-import { FaBars, FaHome, FaUser, FaHospital } from "react-icons/fa";
+import {
+  Home as MuiHome,
+  Person as MuiPerson,
+  LocalHospital as MuiHospital,
+  MenuRounded as MuiMenuRounded,
+} from "@mui/icons-material";
 
 import session from "config/session";
 
@@ -20,24 +25,30 @@ function Header() {
   };
 
   const links: { url: string; name: string; icon: JSX.Element }[] = [
-    { url: "/", name: "Home", icon: <FaHome size={20} /> },
-    { url: "/appointments", name: "Consultas", icon: <FaHospital size={18} /> },
+    { url: "/", name: "Home", icon: <MuiHome fontSize="medium" /> },
+    {
+      url: "/appointments",
+      name: "Consultas",
+      icon: <MuiHospital fontSize="medium" />,
+    },
   ];
 
   if (session.isDoctor()) {
     links.splice(1, 0, {
       url: "/patients",
       name: "Pacientes",
-      icon: <FaUser size={18} />,
+      icon: <MuiPerson fontSize="medium" />,
     });
   }
 
   return (
     <HeaderBody>
-      <FaBars
-        color="#fefefe"
-        size={45}
-        cursor="pointer"
+      <MuiMenuRounded
+        sx={{
+          color: "#fefefe",
+          cursor: "pointer",
+        }}
+        fontSize="large"
         onClick={toggleDrawer(!open)}
       />
       <Drawer open={open} onClose={toggleDrawer(false)}>

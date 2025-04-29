@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { Box, Skeleton, Modal } from "@mui/material";
-import { FaEye } from "react-icons/fa";
+import { Visibility as MuiVisibility } from "@mui/icons-material";
 import { DateTime } from "luxon";
 
 import Button from "components/Button";
 import Input from "components/Input";
 import Header from "components/Header";
 import Select from "components/Select";
+import SnackBar from "components/SnackBar";
 import api from "config/api";
 import { UserEntity } from "config/api/dto";
 import { abbreviateName } from "utils/abbreviateName";
@@ -48,6 +49,8 @@ function Patients() {
       sex: "",
     },
   });
+  const [openSnackBar, setOpenSnackBar] = useState(false);
+  const [snackBarMessage, setSnackBarMessage] = useState("Sucesso!");
 
   const handleOpenEditPatient = () => setOpenEditPatient(true);
   const handleCloseEditPatient = () => {
@@ -138,6 +141,9 @@ function Patients() {
     if (selectedPatient) {
       await api.updateUser(selectedPatient);
 
+      setSnackBarMessage("Paciente atualizado com sucesso!");
+      setOpenSnackBar(true);
+
       await getPatients();
     }
   }
@@ -185,11 +191,20 @@ function Patients() {
       },
     });
 
+    setSnackBarMessage("Paciente criado com sucesso!");
+    setOpenSnackBar(true);
+
     await getPatients();
   }
 
   return (
     <>
+      <SnackBar
+        severity="success"
+        open={openSnackBar}
+        setOpen={setOpenSnackBar}
+        message={snackBarMessage}
+      />
       <Header />
       {loading ? (
         <Box
@@ -223,9 +238,9 @@ function Patients() {
                       "dd/MM/yyyy"
                     )}
                   </span>
-                  <FaEye
-                    size={18}
-                    style={{ cursor: "pointer" }}
+                  <MuiVisibility
+                    fontSize="medium"
+                    sx={{ cursor: "pointer" }}
                     onClick={() => {
                       setSelectedPatientId(patient.id!);
                       handleOpenEditPatient();
