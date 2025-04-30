@@ -15,7 +15,7 @@ export default function SnackBar(props: ISnackBarProps) {
       return;
     }
 
-    props.setOpen(false);
+    props.setOpen((prev) => ({ ...prev, open: false }));
   };
 
   const action = (

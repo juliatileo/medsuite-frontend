@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Box, Skeleton, Modal } from "@mui/material";
+import { Box, Skeleton, Modal, AlertProps } from "@mui/material";
 import { Visibility as MuiVisibility } from "@mui/icons-material";
 import { DateTime } from "luxon";
 
@@ -12,6 +12,8 @@ import api from "config/api";
 import { UserEntity } from "config/api/dto";
 import { abbreviateName } from "utils/abbreviateName";
 import { bloodTypes, sexes } from "utils/types";
+import { validateEmail } from "utils/validateEmail";
+import { validatePhone } from "utils/validatePhone";
 
 import {
   CreatePatientButton,
@@ -49,8 +51,11 @@ function Patients() {
       sex: "",
     },
   });
-  const [openSnackBar, setOpenSnackBar] = useState(false);
-  const [snackBarMessage, setSnackBarMessage] = useState("Sucesso!");
+  const [snackBarProps, setSnackBarProps] = useState<{
+    open: boolean;
+    message: string;
+    severity: AlertProps["severity"];
+  }>({ open: false, message: "", severity: "success" });
 
   const handleOpenEditPatient = () => setOpenEditPatient(true);
   const handleCloseEditPatient = () => {
@@ -137,22 +142,17 @@ function Patients() {
       });
   }
 
-  async function handleUpdatePatient(): Promise<void> {
-    if (selectedPatient) {
-      await api.updateUser(selectedPatient);
-
-      setSnackBarMessage("Paciente atualizado com sucesso!");
-      setOpenSnackBar(true);
-
-      await getPatients();
-    }
-  }
-
   function validateUserEntity(user: UserEntity): boolean {
     if (!user.name || user.name.trim() === "") return false;
     if (!user.password || user.password.trim() === "") return false;
-    if (!user.email || user.email.trim() === "") return false;
-    if (!user.cellphone || user.cellphone.trim() === "") return false;
+    if (!user.email || user.email.trim() === "" || !validateEmail(user.email))
+      return false;
+    if (
+      !user.cellphone ||
+      user.cellphone.trim() === "" ||
+      !validatePhone(user.cellphone)
+    )
+      return false;
     if (user.type === undefined || user.type === null) return false;
 
     if (!user.patientInfo) return false;
@@ -168,12 +168,70 @@ function Patients() {
     return true;
   }
 
+  async function handleUpdatePatient(): Promise<void> {
+    if (selectedPatient) {
+      if (!validateUserEntity(selectedPatient)) {
+        setSnackBarProps({
+          open: true,
+          message: "Preencha todos os campos corretamente.",
+          severity: "error",
+        });
+
+        return;
+      }
+
+      try {
+        await api.updateUser(selectedPatient);
+
+        handleCloseEditPatient();
+
+        setSnackBarProps({
+          open: true,
+          message: "Paciente atualizado com sucesso!",
+          severity: "success",
+        });
+
+        await getPatients();
+      } catch (err) {
+        console.log(err);
+
+        setSnackBarProps({
+          open: true,
+          message: "Ocorreu um erro inesperado. Tente novamente.",
+          severity: "error",
+        });
+
+        handleCloseEditPatient();
+      }
+    }
+  }
+
   async function handleCreatePatient(createPatient: UserEntity): Promise<void> {
     if (!validateUserEntity(createPatient)) {
+      setSnackBarProps({
+        open: true,
+        message: "Preencha todos os campos corretamente.",
+        severity: "error",
+      });
+
       return;
     }
 
-    await api.saveUser(createPatient);
+    try {
+      await api.saveUser(createPatient);
+
+      handleCloseCreatePatient();
+    } catch (err) {
+      console.log(err);
+
+      setSnackBarProps({
+        open: true,
+        message: "Ocorreu um erro inesperado. Tente novamente.",
+        severity: "error",
+      });
+
+      handleCloseEditPatient();
+    }
 
     setPatient({
       name: "",
@@ -191,8 +249,11 @@ function Patients() {
       },
     });
 
-    setSnackBarMessage("Paciente criado com sucesso!");
-    setOpenSnackBar(true);
+    setSnackBarProps({
+      open: true,
+      message: "Paciente criado com sucesso!",
+      severity: "success",
+    });
 
     await getPatients();
   }
@@ -200,10 +261,10 @@ function Patients() {
   return (
     <>
       <SnackBar
-        severity="success"
-        open={openSnackBar}
-        setOpen={setOpenSnackBar}
-        message={snackBarMessage}
+        severity={snackBarProps.severity}
+        open={snackBarProps.open}
+        setOpen={setSnackBarProps}
+        message={snackBarProps.message}
       />
       <Header />
       {loading ? (
@@ -393,7 +454,7 @@ function Patients() {
                 width="280px"
                 height="50px"
                 onClick={() => {
-                  handleUpdatePatient().then(() => handleCloseEditPatient());
+                  handleUpdatePatient();
                 }}
               />
             </ModalContainer>
@@ -542,9 +603,7 @@ function Patients() {
                 height="50px"
                 onClick={() => {
                   if (patient) {
-                    handleCreatePatient(patient).then(() => {
-                      handleCloseCreatePatient();
-                    });
+                    handleCreatePatient(patient);
                   }
                 }}
               />
