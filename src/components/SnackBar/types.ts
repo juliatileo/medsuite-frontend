@@ -12,3 +12,9 @@ export interface ISnackBarProps {
   >;
   message: string;
 }
+
+export interface ISnackBarParams {
+  open: boolean;
+  message: string;
+  severity: AlertProps["severity"];
+}

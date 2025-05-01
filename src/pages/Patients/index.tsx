@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Box, Skeleton, Modal, AlertProps } from "@mui/material";
+import { Box, Skeleton, Modal } from "@mui/material";
 import { Visibility as MuiVisibility } from "@mui/icons-material";
 import { DateTime } from "luxon";
 
@@ -8,8 +8,11 @@ import Input from "components/Input";
 import Header from "components/Header";
 import Select from "components/Select";
 import SnackBar from "components/SnackBar";
+import { ISnackBarParams } from "components/SnackBar/types";
+
 import api from "config/api";
 import { UserEntity } from "config/api/dto";
+
 import { abbreviateName } from "utils/abbreviateName";
 import { bloodTypes, sexes } from "utils/types";
 import { validateEmail } from "utils/validateEmail";
@@ -51,11 +54,11 @@ function Patients() {
       sex: "",
     },
   });
-  const [snackBarProps, setSnackBarProps] = useState<{
-    open: boolean;
-    message: string;
-    severity: AlertProps["severity"];
-  }>({ open: false, message: "", severity: "success" });
+  const [snackBarProps, setSnackBarProps] = useState<ISnackBarParams>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const handleOpenEditPatient = () => setOpenEditPatient(true);
   const handleCloseEditPatient = () => {
@@ -535,7 +538,11 @@ function Patients() {
                   }}
                 />
                 <Select
-                  value="Selecione o tipo sanguíneo"
+                  value={
+                    patient?.patientInfo?.bloodType
+                      ? patient.patientInfo.bloodType.toString()
+                      : "Selecione o tipo sanguíneo"
+                  }
                   width="330px"
                   height="60px"
                   center="true"
@@ -547,7 +554,7 @@ function Patients() {
                       createPatient: true,
                     });
                   }}
-                  options={bloodTypes}
+                  options={["Selecione o tipo sanguíneo", ...bloodTypes]}
                 />
                 <Input
                   placeholder="Altura"
@@ -580,7 +587,11 @@ function Patients() {
                   }}
                 />
                 <Select
-                  value="Selecione o sexo"
+                  value={
+                    patient?.patientInfo?.sex
+                      ? patient.patientInfo.sex.toString()
+                      : "Selecione o sexo"
+                  }
                   width="270px"
                   height="60px"
                   center="true"
@@ -594,7 +605,7 @@ function Patients() {
                       createPatient: true,
                     });
                   }}
-                  options={sexes}
+                  options={["Selecione o sexo", ...sexes]}
                 />
               </ModalInputsContainer>
               <Button
