@@ -304,7 +304,9 @@ function Patients() {
                   </span>
                   <MuiVisibility
                     fontSize="medium"
-                    sx={{ cursor: "pointer" }}
+                    sx={{
+                      cursor: "pointer",
+                    }}
                     onClick={() => {
                       setSelectedPatientId(patient.id!);
                       handleOpenEditPatient();

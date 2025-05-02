@@ -28,6 +28,7 @@ export const PatientName = styled.span`
 export const DateContainer = styled.div`
   display: flex;
   justify-content: space-around;
+  align-items: center;
   margin-right: 15px;
   column-gap: 10px;
 `;

@@ -56,6 +56,19 @@ class API {
     return this.api.get(`user/${id}`);
   }
 
+  async forgotPassword(body: {
+    email: string;
+  }): Promise<AxiosResponse<UserEntity>> {
+    return this.api.put("user/forgot-password", body);
+  }
+
+  async resetPassword(body: {
+    password: string;
+    token: string;
+  }): Promise<AxiosResponse<UserEntity>> {
+    return this.api.put("user/reset-password", body);
+  }
+
   // APPOINTMENT
   async saveAppointment(
     body: Partial<AppointmentEntity>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, redirect } from "react-router";
+import { Link, Navigate } from "react-router";
 
 import Input from "components/Input";
 import Button from "components/Button";
@@ -20,6 +20,7 @@ function Login(): JSX.Element {
     message: "",
     severity: "success",
   });
+  const [shouldRedirect, setShouldRedirect] = useState<boolean>(false);
 
   async function login() {
     if (!loginParams.email || !loginParams.password) {
@@ -45,15 +46,15 @@ function Login(): JSX.Element {
     await api
       .login(loginParams)
       .then((res) => {
-        redirect("/");
-
         if (res.data.user.type === UserType.DOCTOR) {
           session.logInAsDoctor(res.data.user, res.data.token);
         } else {
           session.logInAsPatient(res.data.user, res.data.token);
         }
+
+        setShouldRedirect(true);
       })
-      .catch((_err) => {
+      .catch(() => {
         setSnackBarProps({
           open: true,
           message: "Ocorreu um erro ao fazer login, tente novamente.",
@@ -64,6 +65,7 @@ function Login(): JSX.Element {
 
   return (
     <>
+      {shouldRedirect && <Navigate replace to="/" />}
       <SnackBar
         severity={snackBarProps.severity}
         open={snackBarProps.open}
