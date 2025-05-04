@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Navigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 import Input from "components/Input";
 import Button from "components/Button";
@@ -14,13 +14,13 @@ import { LoginContainer, LoginCreateAccount } from "./styles";
 import { validateEmail } from "utils/validateEmail";
 
 function Login(): JSX.Element {
+  const navigate = useNavigate();
   const [loginParams, setLoginParams] = useState<LoginParams>({});
   const [snackBarProps, setSnackBarProps] = useState<ISnackBarParams>({
     open: false,
     message: "",
     severity: "success",
   });
-  const [shouldRedirect, setShouldRedirect] = useState<boolean>(false);
 
   async function login() {
     if (!loginParams.email || !loginParams.password) {
@@ -42,30 +42,27 @@ function Login(): JSX.Element {
 
       return;
     }
+    try {
+      const res = await api.login(loginParams);
 
-    await api
-      .login(loginParams)
-      .then((res) => {
-        if (res.data.user.type === UserType.DOCTOR) {
-          session.logInAsDoctor(res.data.user, res.data.token);
-        } else {
-          session.logInAsPatient(res.data.user, res.data.token);
-        }
+      if (res.data.user.type === UserType.DOCTOR) {
+        session.logInAsDoctor(res.data.user, res.data.token);
+      } else {
+        session.logInAsPatient(res.data.user, res.data.token);
+      }
 
-        setShouldRedirect(true);
-      })
-      .catch(() => {
-        setSnackBarProps({
-          open: true,
-          message: "Ocorreu um erro ao fazer login, tente novamente.",
-          severity: "error",
-        });
+      navigate("/", { replace: true });
+    } catch (err) {
+      setSnackBarProps({
+        open: true,
+        message: "Ocorreu um erro ao fazer login, tente novamente.",
+        severity: "error",
       });
+    }
   }
 
   return (
     <>
-      {shouldRedirect && <Navigate replace to="/" />}
       <SnackBar
         severity={snackBarProps.severity}
         open={snackBarProps.open}

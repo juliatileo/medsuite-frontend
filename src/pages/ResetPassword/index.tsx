@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate } from "react-router";
+import { useNavigate } from "react-router";
 
 import api from "config/api";
 
@@ -13,13 +13,13 @@ import { useQuery } from "utils/useQuery";
 
 function ResetPassword(): JSX.Element {
   const query = useQuery();
+  const navigate = useNavigate();
   const [password, setPassword] = useState<string>("");
   const [snackBarProps, setSnackBarProps] = useState<ISnackBarParams>({
     open: false,
     message: "",
     severity: "success",
   });
-  const [shouldRedirect, setShouldRedirect] = useState<boolean>(false);
 
   async function resetPassword() {
     if (!password) {
@@ -34,12 +34,19 @@ function ResetPassword(): JSX.Element {
 
     const token = query.get("token");
 
-    console.log(token);
-
     if (token) {
       await api.resetPassword({ password, token });
 
-      setShouldRedirect(true);
+      setSnackBarProps({
+        open: true,
+        message:
+          "Senha alterada com sucesso! Estamos te redirecionado para o login...",
+        severity: "success",
+      });
+
+      setTimeout(() => {
+        navigate("/", { replace: true });
+      }, 1500);
     } else {
       setSnackBarProps({
         open: true,
@@ -47,13 +54,12 @@ function ResetPassword(): JSX.Element {
         severity: "error",
       });
 
-      setShouldRedirect(true);
+      navigate("/", { replace: true });
     }
   }
 
   return (
     <>
-      {shouldRedirect && <Navigate replace to="/" />}
       <SnackBar
         severity={snackBarProps.severity}
         open={snackBarProps.open}

@@ -70,17 +70,11 @@ function Patients() {
   const handleCloseCreatePatient = () => setOpenCreatePatient(false);
 
   async function getPatients() {
-    await api
-      .listPatients()
-      .then((res) => {
-        setPatients(res.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    const res = await api.listPatients();
+
+    setPatients(res.data);
+
+    setLoading(false);
   }
 
   useEffect(() => {
@@ -90,17 +84,11 @@ function Patients() {
   useEffect(() => {
     async function getUserById() {
       if (selectedPatientId !== null) {
-        await api
-          .getUserById(selectedPatientId)
-          .then((res) => {
-            setSelectedPatient(res.data);
-          })
-          .catch((error) => {
-            console.log(error);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
+        const res = await api.getUserById(selectedPatientId);
+
+        setSelectedPatient(res.data);
+
+        setLoading(false);
       }
     }
 
@@ -196,8 +184,6 @@ function Patients() {
 
         await getPatients();
       } catch (err) {
-        console.log(err);
-
         setSnackBarProps({
           open: true,
           message: "Ocorreu um erro inesperado. Tente novamente.",
@@ -225,8 +211,6 @@ function Patients() {
 
       handleCloseCreatePatient();
     } catch (err) {
-      console.log(err);
-
       setSnackBarProps({
         open: true,
         message: "Ocorreu um erro inesperado. Tente novamente.",

@@ -10,13 +10,17 @@ import ForgotPassword from "pages/ForgotPassword";
 import ResetPassword from "pages/ResetPassword";
 
 function Router() {
-  const authenticatedRoutes = [
+  let authenticatedRoutes = [
     <Route path="*" element={<Home />} />,
     <Route path="/appointments" element={<Appointments />} />,
   ];
 
   if (session.isDoctor()) {
     authenticatedRoutes.push(<Route path="/patients" element={<Patients />} />);
+  }
+
+  if (session.isFirstAccess()) {
+    authenticatedRoutes = [<Route path="*" element={<Home />} />];
   }
 
   return (

@@ -29,21 +29,16 @@ function Home() {
 
   useEffect(() => {
     async function getAppointments() {
-      if (user) {
+      if (user && user.id) {
         const appointmentGetFunction = session.isPatient()
-          ? api.listAppointmentsByPatientId(user?.id)
-          : api.listAppointmentsByDoctorId(user?.id);
+          ? api.listAppointmentsByPatientId(user.id)
+          : api.listAppointmentsByDoctorId(user.id);
 
-        await appointmentGetFunction
-          .then((res) => {
-            setAppointments(res.data);
-          })
-          .catch((error) => {
-            console.log(error);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
+        const res = await appointmentGetFunction;
+
+        setAppointments(res.data);
+
+        setLoading(false);
       }
     }
 

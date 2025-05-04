@@ -22,7 +22,7 @@ class API {
     this.api.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
-        console.log(error);
+        console.error(error);
 
         if (error.status === 401) {
           session.logOut();
@@ -58,7 +58,7 @@ class API {
 
   async forgotPassword(body: {
     email: string;
-  }): Promise<AxiosResponse<UserEntity>> {
+  }): Promise<AxiosResponse<string>> {
     return this.api.put("user/forgot-password", body);
   }
 

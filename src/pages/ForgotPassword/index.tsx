@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { AxiosError } from "axios";
+import { useNavigate } from "react-router";
 
 import api from "config/api";
 
@@ -13,6 +14,7 @@ import { LoginContainer } from "pages/Login/styles";
 import { validateEmail } from "utils/validateEmail";
 
 function ForgotPassword(): JSX.Element {
+  const navigate = useNavigate();
   const [email, setEmail] = useState<string>("");
   const [snackBarProps, setSnackBarProps] = useState<ISnackBarParams>({
     open: false,
@@ -41,33 +43,39 @@ function ForgotPassword(): JSX.Element {
       return;
     }
 
-    await api
-      .forgotPassword({ email })
-      .then(() => {
+    try {
+      const forgotPasswordResponse = await api.forgotPassword({ email });
+
+      setSnackBarProps({
+        open: true,
+        message: "Código enviado com sucesso.",
+        severity: "success",
+      });
+
+      setTimeout(
+        () => navigate(forgotPasswordResponse.data, { replace: true }),
+        1500
+      );
+    } catch (err) {
+      const error = err as AxiosError;
+
+      if (
+        error.status === 404 &&
+        (error.response?.data as { message: string }).message ===
+          "User not found"
+      ) {
         setSnackBarProps({
           open: true,
-          message: "E-mail enviado com sucesso.",
-          severity: "success",
+          message: "Usuário não encontrado.",
+          severity: "error",
         });
-      })
-      .catch((err: AxiosError) => {
-        if (
-          err.status === 404 &&
-          (err.response?.data as { message: string }).message ===
-            "User not found"
-        ) {
-          setSnackBarProps({
-            open: true,
-            message: "Usuário não encontrado.",
-            severity: "error",
-          });
-        } else
-          setSnackBarProps({
-            open: true,
-            message: "Ocorreu um erro ao enviar o e-mail, tente novamente.",
-            severity: "error",
-          });
-      });
+      } else
+        setSnackBarProps({
+          open: true,
+          message: "Ocorreu um erro ao enviar o e-mail, tente novamente.",
+          severity: "error",
+        });
+    }
   }
 
   return (

@@ -1,111 +1,114 @@
 import CryptoJS from "crypto-js";
-import { redirect } from "react-router";
 
 import { tokenSecret, userSecret } from "./env";
 import { UserEntity } from "./api/dto";
 
 class Session {
-  isAuthenticated = () => localStorage.getItem("session") !== null;
-  isPatient = () => localStorage.getItem("isPatient") !== null;
-  isDoctor = () => localStorage.getItem("isDoctor") !== null;
+  private isSessionActive(): boolean {
+    return localStorage.getItem("session") !== null;
+  }
 
-  logInAsPatient(user: UserEntity, token: string) {
-    console.log(
-      localStorage.getItem("session") === null,
-      userSecret,
-      tokenSecret
-    );
+  private encryptData(data: string, secret: string): string {
+    return CryptoJS.AES.encrypt(data, secret).toString();
+  }
 
-    if (localStorage.getItem("session") === null && userSecret && tokenSecret) {
-      const encrypted = CryptoJS.AES.encrypt(
-        JSON.stringify(user),
-        userSecret
-      ).toString();
-      localStorage.setItem("session", encrypted);
-      const encryptedToken = CryptoJS.AES.encrypt(
-        JSON.stringify(token),
-        tokenSecret
-      ).toString();
-      localStorage.setItem("token", encryptedToken);
-      localStorage.setItem("isPatient", "true");
-      window.location.reload();
+  private decryptData(encryptedData: string, secret: string): string | null {
+    try {
+      const bytes = CryptoJS.AES.decrypt(encryptedData, secret);
+
+      return bytes.toString(CryptoJS.enc.Utf8);
+    } catch {
+      return null;
     }
   }
 
-  logInAsDoctor(user: UserEntity, token: string) {
-    if (localStorage.getItem("session") === null && userSecret && tokenSecret) {
-      const encrypted = CryptoJS.AES.encrypt(
-        JSON.stringify(user),
-        userSecret
-      ).toString();
-      localStorage.setItem("session", encrypted);
-      const encryptedToken = CryptoJS.AES.encrypt(
-        JSON.stringify(token),
-        tokenSecret
-      ).toString();
-      localStorage.setItem("token", encryptedToken);
-      localStorage.setItem("isDoctor", "true");
-      window.location.reload();
-    }
+  private storeSession(user: UserEntity, token: string, roleKey: string): void {
+    const encryptedUser = this.encryptData(JSON.stringify(user), userSecret);
+    const encryptedToken = this.encryptData(JSON.stringify(token), tokenSecret);
+
+    localStorage.setItem("session", encryptedUser);
+    localStorage.setItem("token", encryptedToken);
+    localStorage.setItem(roleKey, "true");
+
+    window.location.reload();
   }
 
-  getUserInfo() {
-    console.log({
-      tokenIsNull: localStorage.getItem("token") !== null,
-      isPatientIsNull: localStorage.getItem("isPatient") !== null,
-      isDoctorIsNull: localStorage.getItem("isDoctor") !== null,
-      userSecret,
-      tokenSecret,
-    });
-
-    if (
+  private isSessionValid(): boolean {
+    return (
+      (this.isPatient() || this.isDoctor()) &&
       localStorage.getItem("token") !== null &&
-      (localStorage.getItem("isPatient") !== null ||
-        localStorage.getItem("isDoctor") !== null) &&
       userSecret &&
       tokenSecret
-    ) {
-      const encrypted = localStorage.getItem("session");
-      if (encrypted) {
-        const bytes = CryptoJS.AES.decrypt(encrypted, userSecret);
-        let originalText = "";
-        try {
-          originalText = bytes.toString(CryptoJS.enc.Utf8);
-          return JSON.parse(originalText) as UserEntity;
-        } catch (err) {
-          this.logOut(err as Error);
-        }
-      } else this.logOut(new Error("aquiee"));
-    } else this.logOut(new Error("aquie"));
+    );
   }
 
-  getToken() {
-    if (
-      (localStorage.getItem("isPatient") !== null ||
-        localStorage.getItem("isDoctor") !== null) &&
-      localStorage.getItem("token") !== null &&
-      tokenSecret !== null
-    ) {
-      const encrypted = localStorage.getItem("token");
-
-      if (encrypted) {
-        const bytes = CryptoJS.AES.decrypt(encrypted, tokenSecret);
-        let originalText = "";
-        try {
-          originalText = bytes.toString(CryptoJS.enc.Utf8);
-          return String(originalText).replace(/"/g, "");
-        } catch (err) {
-          this.logOut(err as Error);
-          redirect("/");
-        }
-      } else this.logOut(new Error("aqui talvez"));
-    } else this.logOut(new Error("aqui"));
+  public isAuthenticated(): boolean {
+    return this.isSessionActive();
   }
 
-  logOut(err?: Error) {
-    console.log(err);
+  public isPatient(): boolean {
+    return localStorage.getItem("isPatient") !== null;
+  }
 
-    console.log("logout");
+  public isDoctor(): boolean {
+    return localStorage.getItem("isDoctor") !== null;
+  }
+
+  public isFirstAccess(): boolean {
+    const user = this.getUserInfo();
+
+    return user?.firstAccess || false;
+  }
+
+  public logInAsPatient(user: UserEntity, token: string): void {
+    if (!this.isSessionActive() && userSecret && tokenSecret) {
+      this.storeSession(user, token, "isPatient");
+    }
+  }
+
+  public logInAsDoctor(user: UserEntity, token: string): void {
+    if (!this.isSessionActive() && userSecret && tokenSecret) {
+      this.storeSession(user, token, "isDoctor");
+    }
+  }
+
+  public getUserInfo(): UserEntity | null {
+    if (this.isSessionValid()) {
+      const encryptedUser = localStorage.getItem("session");
+
+      if (encryptedUser) {
+        const decryptedUser = this.decryptData(encryptedUser, userSecret);
+        if (decryptedUser) {
+          return JSON.parse(decryptedUser) as UserEntity;
+        }
+      }
+    }
+
+    this.logOut();
+
+    return null;
+  }
+
+  public getToken(): string | null {
+    if (this.isSessionValid()) {
+      const encryptedToken = localStorage.getItem("token");
+
+      if (encryptedToken) {
+        const decryptedToken = this.decryptData(encryptedToken, tokenSecret);
+        if (decryptedToken) {
+          return decryptedToken.replace(/"/g, "");
+        }
+      }
+    }
+    this.logOut();
+
+    return null;
+  }
+
+  public logOut(error?: Error): void {
+    if (error) {
+      console.error("Error during logout:", error);
+    }
 
     localStorage.removeItem("session");
     localStorage.removeItem("token");
