@@ -10,10 +10,14 @@ import { ISnackBarParams } from "components/SnackBar/types";
 
 import { LoginContainer } from "pages/Login/styles";
 import { useQuery } from "utils/useQuery";
+import session from "config/session";
+
+import { useFirstAccess } from "providers/FirstAccessProvider";
 
 function ResetPassword(): JSX.Element {
   const query = useQuery();
   const navigate = useNavigate();
+  const firstAccessContext = useFirstAccess();
   const [password, setPassword] = useState<string>("");
   const [snackBarProps, setSnackBarProps] = useState<ISnackBarParams>({
     open: false,
@@ -35,19 +39,62 @@ function ResetPassword(): JSX.Element {
     const token = query.get("token");
 
     if (token) {
-      await api.resetPassword({ password, token });
+      try {
+        await api.resetPassword({ password, token });
 
+        setSnackBarProps({
+          open: true,
+          message:
+            "Senha alterada com sucesso! Estamos te redirecionado para o login...",
+          severity: "success",
+        });
+
+        setTimeout(() => {
+          navigate("/", { replace: true });
+        }, 1500);
+      } catch {
+        setSnackBarProps({
+          open: true,
+          message: "Ocorreu um erro ao redefinir a senha, tente novamente.",
+          severity: "error",
+        });
+
+        navigate("/", { replace: true });
+      }
+    }
+  }
+
+  async function updatePassword() {
+    if (!password) {
       setSnackBarProps({
         open: true,
-        message:
-          "Senha alterada com sucesso! Estamos te redirecionado para o login...",
-        severity: "success",
+        message: "Preencha todos os campos.",
+        severity: "error",
       });
 
-      setTimeout(() => {
-        navigate("/", { replace: true });
-      }, 1500);
-    } else {
+      return;
+    }
+
+    try {
+      const user = session.getUserInfo();
+
+      if (user) {
+        await api.updateUser({ id: user.id, password, firstAccess: false });
+
+        firstAccessContext.setFirstAccess(false);
+
+        setSnackBarProps({
+          open: true,
+          message:
+            "Senha alterada com sucesso! Estamos te redirecionado para a home...",
+          severity: "success",
+        });
+
+        setTimeout(() => {
+          navigate("/", { replace: true });
+        }, 1500);
+      }
+    } catch {
       setSnackBarProps({
         open: true,
         message: "Ocorreu um erro ao redefinir a senha, tente novamente.",
@@ -67,12 +114,17 @@ function ResetPassword(): JSX.Element {
         message={snackBarProps.message}
       />
       <LoginContainer>
-        <h2>Preencha sua nova senha.</h2>
+        <h2>
+          {firstAccessContext.isFirstAccess
+            ? "Seja bem vindo(a)! Como esse é o seu primeiro acesso ao Medsuite, defina uma nova senha para sua segurança."
+            : "Preencha sua nova senha."}
+        </h2>
         <form
           onSubmit={async (res) => {
             res.preventDefault();
 
-            await resetPassword();
+            if (firstAccessContext.isFirstAccess) await updatePassword();
+            else resetPassword();
           }}
         >
           <Input

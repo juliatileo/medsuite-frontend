@@ -69,6 +69,10 @@ class API {
     return this.api.put("user/reset-password", body);
   }
 
+  async deleteUser(id: string): Promise<AxiosResponse<UserEntity>> {
+    return this.api.put("user", { id, deletedAt: new Date() });
+  }
+
   // APPOINTMENT
   async saveAppointment(
     body: Partial<AppointmentEntity>

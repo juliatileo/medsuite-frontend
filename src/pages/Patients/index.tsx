@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { Box, Skeleton, Modal } from "@mui/material";
-import { Visibility as MuiVisibility } from "@mui/icons-material";
+import {
+  Visibility as MuiVisibility,
+  Delete as MuiDelete,
+} from "@mui/icons-material";
 import { DateTime } from "luxon";
 
 import Button from "components/Button";
@@ -26,6 +29,7 @@ import {
   PatientCard,
   PatientCardContainer,
   PatientName,
+  PatientsContainer,
 } from "./styles";
 
 function Patients() {
@@ -245,6 +249,26 @@ function Patients() {
     await getPatients();
   }
 
+  async function deletePatient(id: string) {
+    try {
+      await api.deleteUser(id);
+
+      await getPatients();
+
+      setSnackBarProps({
+        open: true,
+        message: "Paciente deletado com sucesso!",
+        severity: "success",
+      });
+    } catch (err) {
+      setSnackBarProps({
+        open: true,
+        message: "Ocorreu um erro inesperado. Tente novamente.",
+        severity: "error",
+      });
+    }
+  }
+
   return (
     <>
       <SnackBar
@@ -276,30 +300,42 @@ function Patients() {
         </Box>
       ) : (
         <>
-          <PatientCardContainer>
-            {patients.map((patient) => (
-              <PatientCard key={patient.id}>
-                <PatientName>{abbreviateName(patient.name)}</PatientName>
-                <DateContainer>
-                  <span>
-                    {DateTime.fromISO(patient.createdAt!).toFormat(
-                      "dd/MM/yyyy"
-                    )}
-                  </span>
-                  <MuiVisibility
-                    fontSize="medium"
-                    sx={{
-                      cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      setSelectedPatientId(patient.id!);
-                      handleOpenEditPatient();
-                    }}
-                  />
-                </DateContainer>
-              </PatientCard>
-            ))}
-          </PatientCardContainer>
+          <PatientsContainer>
+            <PatientCardContainer>
+              {patients.map((patient) => (
+                <PatientCard key={patient.id}>
+                  <PatientName>{abbreviateName(patient.name)}</PatientName>
+                  <DateContainer>
+                    <span>
+                      {DateTime.fromISO(patient.createdAt!).toFormat(
+                        "dd/MM/yyyy"
+                      )}
+                    </span>
+                    <MuiVisibility
+                      fontSize="medium"
+                      sx={{
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        setSelectedPatientId(patient.id!);
+                        handleOpenEditPatient();
+                      }}
+                    />
+                    <MuiDelete
+                      fontSize="medium"
+                      sx={{
+                        cursor: "pointer",
+                        color: "crimson",
+                      }}
+                      onClick={async () => {
+                        await deletePatient(patient.id!);
+                      }}
+                    />
+                  </DateContainer>
+                </PatientCard>
+              ))}
+            </PatientCardContainer>
+          </PatientsContainer>
           <CreatePatientButton onClick={handleOpenCreatePatient}>
             ADICIONAR PACIENTE
           </CreatePatientButton>

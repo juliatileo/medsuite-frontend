@@ -8,8 +8,11 @@ import Patients from "pages/Patients";
 import Appointments from "pages/Appointments";
 import ForgotPassword from "pages/ForgotPassword";
 import ResetPassword from "pages/ResetPassword";
+import { useFirstAccess } from "providers/FirstAccessProvider";
 
 function Router() {
+  const firstAccessContext = useFirstAccess();
+
   let authenticatedRoutes = [
     <Route path="*" element={<Home />} />,
     <Route path="/appointments" element={<Appointments />} />,
@@ -19,8 +22,8 @@ function Router() {
     authenticatedRoutes.push(<Route path="/patients" element={<Patients />} />);
   }
 
-  if (session.isFirstAccess()) {
-    authenticatedRoutes = [<Route path="*" element={<Home />} />];
+  if (firstAccessContext.isFirstAccess) {
+    authenticatedRoutes = [<Route path="*" element={<ResetPassword />} />];
   }
 
   return (

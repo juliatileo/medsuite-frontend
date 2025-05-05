@@ -27,7 +27,8 @@
       "@components/*": ["./src/components/*"],
       "@config/*": ["./src/config/*"],
       "@pages/*": ["./src/pages/*"],
-      "@utils/*": ["./src/utils/*"]
+      "@utils/*": ["./src/utils/*"],
+      "@providers/*": ["./src/providers/*"]
     }
   },
   "include": ["src"]

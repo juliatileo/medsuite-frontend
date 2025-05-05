@@ -1,22 +1,41 @@
 import styled from "styled-components";
 
-export const PatientCardContainer = styled.div`
+export const PatientsContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  row-gap: 20px;
   width: 100vw;
   height: 100vh;
+`;
+
+export const PatientCardContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  width: 80%;
+  justify-content: space-between;
+  row-gap: 20px;
   margin-top: 30px;
 `;
 
 export const PatientCard = styled.div`
   display: flex;
   align-items: center;
-  width: 1250px;
+  width: 1015px;
   height: 80px;
   justify-content: space-between;
   background-color: ${(props) => props.theme.colors.seasalt};
+
+  @media (max-width: 1920px) {
+    width: 755px;
+  }
+
+  @media (max-width: 1280px) {
+    width: 100%;
+  }
+
+  @media (max-width: 720px) {
+    width: 100%;
+  }
 `;
 
 export const PatientName = styled.span`

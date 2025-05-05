@@ -10,6 +10,7 @@ export default defineConfig({
       config: "/src/config",
       pages: "/src/pages",
       utils: "/src/utils",
+      providers: "/src/providers",
     },
   },
 });

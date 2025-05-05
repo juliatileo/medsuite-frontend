@@ -143,7 +143,7 @@ function Home() {
                 day: CustomDay,
               }}
               readOnly
-              sx={{ margin: 0 }}
+              sx={{ margin: 0, backgroundColor: "#F6F6F6" }}
             />
           </CalendarContainer>
         </LocalizationProvider>
