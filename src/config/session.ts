@@ -114,6 +114,8 @@ class Session {
     localStorage.removeItem("token");
     localStorage.removeItem("isPatient");
     localStorage.removeItem("isDoctor");
+
+    window.location.reload();
   }
 }
 
