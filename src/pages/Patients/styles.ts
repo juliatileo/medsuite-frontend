@@ -8,6 +8,13 @@ export const PatientsContainer = styled.div`
   height: 100vh;
 `;
 
+export const PatientsSearchContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+`;
+
 export const PatientCardContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -27,6 +34,10 @@ export const PatientCard = styled.div`
 
   @media (max-width: 1920px) {
     width: 755px;
+  }
+
+  @media (max-width: 1366px) {
+    width: 100%;
   }
 
   @media (max-width: 1280px) {
@@ -73,7 +84,8 @@ export const ModalContainer = styled.div`
   right: 0;
   top: 0;
   bottom: 0;
-  height: 650px;
+  height: fit-content;
+  padding: 30px 0;
   width: 1100px;
   display: flex;
   flex-direction: column;
@@ -93,4 +105,20 @@ export const ModalInputsContainer = styled.div`
   row-gap: 50px;
   justify-content: space-between;
   margin: 30px 50px;
+
+  @media (max-width: 1920px) {
+    row-gap: 50px;
+  }
+
+  @media (max-width: 1366px) {
+    row-gap: 20px;
+  }
+
+  @media (max-width: 1280px) {
+    row-gap: 20px;
+  }
+
+  @media (max-width: 720px) {
+    row-gap: 20px;
+  }
 `;

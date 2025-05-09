@@ -84,8 +84,6 @@ class Session {
       }
     }
 
-    this.logOut();
-
     return null;
   }
 
@@ -100,7 +98,6 @@ class Session {
         }
       }
     }
-    this.logOut();
 
     return null;
   }

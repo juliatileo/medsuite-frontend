@@ -12,9 +12,10 @@ import Header from "components/Header";
 import Select from "components/Select";
 import SnackBar from "components/SnackBar";
 import { ISnackBarParams } from "components/SnackBar/types";
+import Search from "components/Search";
 
 import api from "config/api";
-import { UserEntity } from "config/api/dto";
+import { IUsersSearchParameters, UserEntity, UserType } from "config/api/dto";
 
 import { abbreviateName } from "utils/abbreviateName";
 import { bloodTypes, sexes } from "utils/types";
@@ -30,6 +31,7 @@ import {
   PatientCardContainer,
   PatientName,
   PatientsContainer,
+  PatientsSearchContainer,
 } from "./styles";
 
 function Patients() {
@@ -48,6 +50,7 @@ function Patients() {
     password: "",
     email: "",
     cellphone: "",
+    taxIdentifier: "",
     type: 1,
     firstAccess: true,
     patientInfo: {
@@ -63,6 +66,12 @@ function Patients() {
     message: "",
     severity: "success",
   });
+  const [paginatedParams, setPaginatedParams] =
+    useState<IUsersSearchParameters>({
+      offset: 0,
+      limit: 10,
+      type: UserType.PATIENT,
+    });
 
   const handleOpenEditPatient = () => setOpenEditPatient(true);
   const handleCloseEditPatient = () => {
@@ -74,9 +83,9 @@ function Patients() {
   const handleCloseCreatePatient = () => setOpenCreatePatient(false);
 
   async function getPatients() {
-    const res = await api.listPatients();
+    const res = await api.getPaginated(paginatedParams);
 
-    setPatients(res.data);
+    setPatients(res.data.rows);
 
     setLoading(false);
   }
@@ -149,6 +158,10 @@ function Patients() {
     )
       return false;
     if (user.type === undefined || user.type === null) return false;
+
+    if (!user.taxIdentifier || user.taxIdentifier.trim() === "") return false;
+    if (user.taxIdentifier.length !== 11 && user.taxIdentifier.length !== 14)
+      return false;
 
     if (!user.patientInfo) return false;
     if (!user.patientInfo.birthDate || user.patientInfo.birthDate.trim() === "")
@@ -229,6 +242,7 @@ function Patients() {
       password: "",
       email: "",
       cellphone: "",
+      taxIdentifier: "",
       type: 1,
       firstAccess: true,
       patientInfo: {
@@ -300,42 +314,45 @@ function Patients() {
         </Box>
       ) : (
         <>
-          <PatientsContainer>
-            <PatientCardContainer>
-              {patients.map((patient) => (
-                <PatientCard key={patient.id}>
-                  <PatientName>{abbreviateName(patient.name)}</PatientName>
-                  <DateContainer>
-                    <span>
-                      {DateTime.fromISO(patient.createdAt!).toFormat(
-                        "dd/MM/yyyy"
-                      )}
-                    </span>
-                    <MuiVisibility
-                      fontSize="medium"
-                      sx={{
-                        cursor: "pointer",
-                      }}
-                      onClick={() => {
-                        setSelectedPatientId(patient.id!);
-                        handleOpenEditPatient();
-                      }}
-                    />
-                    <MuiDelete
-                      fontSize="medium"
-                      sx={{
-                        cursor: "pointer",
-                        color: "crimson",
-                      }}
-                      onClick={async () => {
-                        await deletePatient(patient.id!);
-                      }}
-                    />
-                  </DateContainer>
-                </PatientCard>
-              ))}
-            </PatientCardContainer>
-          </PatientsContainer>
+          <PatientsSearchContainer>
+            <Search />
+            <PatientsContainer>
+              <PatientCardContainer>
+                {patients.map((patient) => (
+                  <PatientCard key={patient.id}>
+                    <PatientName>{abbreviateName(patient.name)}</PatientName>
+                    <DateContainer>
+                      <span>
+                        {DateTime.fromISO(patient.createdAt!).toFormat(
+                          "dd/MM/yyyy"
+                        )}
+                      </span>
+                      <MuiVisibility
+                        fontSize="medium"
+                        sx={{
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          setSelectedPatientId(patient.id!);
+                          handleOpenEditPatient();
+                        }}
+                      />
+                      <MuiDelete
+                        fontSize="medium"
+                        sx={{
+                          cursor: "pointer",
+                          color: "crimson",
+                        }}
+                        onClick={async () => {
+                          await deletePatient(patient.id!);
+                        }}
+                      />
+                    </DateContainer>
+                  </PatientCard>
+                ))}
+              </PatientCardContainer>
+            </PatientsContainer>
+          </PatientsSearchContainer>
           <CreatePatientButton onClick={handleOpenCreatePatient}>
             ADICIONAR PACIENTE
           </CreatePatientButton>
@@ -346,12 +363,27 @@ function Patients() {
                 <Input
                   placeholder="Nome"
                   value={selectedPatient?.name ? selectedPatient.name : ""}
-                  width="550px"
+                  width="100%"
                   height="60px"
                   type="text"
                   center="false"
                   onChange={(res) => {
                     handleEditPatient({ res, field: "name" });
+                  }}
+                />
+                <Input
+                  placeholder="CPF/CNPJ"
+                  value={
+                    selectedPatient?.taxIdentifier
+                      ? selectedPatient.taxIdentifier
+                      : ""
+                  }
+                  width="550px"
+                  height="60px"
+                  type="text"
+                  center="false"
+                  onChange={(res) => {
+                    handleEditPatient({ res, field: "taxIdentifier" });
                   }}
                 />
                 <Input
@@ -490,7 +522,7 @@ function Patients() {
               <ModalInputsContainer>
                 <Input
                   placeholder="Nome"
-                  width="550px"
+                  width="100%"
                   height="60px"
                   type="text"
                   center="false"
@@ -498,6 +530,20 @@ function Patients() {
                     handleEditPatient({
                       res,
                       field: "name",
+                      createPatient: true,
+                    });
+                  }}
+                />
+                <Input
+                  placeholder="CPF/CNPJ"
+                  width="550px"
+                  height="60px"
+                  type="text"
+                  center="false"
+                  onChange={(res) => {
+                    handleEditPatient({
+                      res,
+                      field: "taxIdentifier",
                       createPatient: true,
                     });
                   }}
@@ -618,8 +664,6 @@ function Patients() {
                   height="60px"
                   center="true"
                   onChange={(res) => {
-                    console.log(res.target.value);
-
                     handleEditPatient({
                       res,
                       field: "sex",

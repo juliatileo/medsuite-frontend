@@ -4,11 +4,15 @@ import session from "config/session";
 
 import {
   AppointmentEntity,
+  IUsersSearchParameters,
   LoginParams,
   LoginResponse,
+  Pagination,
   UserEntity,
+  UserType,
 } from "./dto";
 import { DateTime } from "luxon";
+import { formatParams } from "utils/formatParams";
 
 class API {
   private api: AxiosInstance;
@@ -48,8 +52,12 @@ class API {
     return this.api.put("user", body);
   }
 
-  async listPatients(): Promise<AxiosResponse<UserEntity[]>> {
-    return this.api.get("user/patients");
+  async getPaginated(
+    params: IUsersSearchParameters
+  ): Promise<AxiosResponse<Pagination<UserEntity>>> {
+    const paramsString: string = formatParams(params);
+
+    return this.api.get(`user/get-paginated?${paramsString}`);
   }
 
   async getUserById(id: string): Promise<AxiosResponse<UserEntity>> {

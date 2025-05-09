@@ -17,6 +17,7 @@ export interface UserEntity {
   name: string;
   cellphone: string;
   email: string;
+  taxIdentifier: string;
   password: string;
   type: UserType;
   firstAccess?: boolean;
@@ -40,4 +41,24 @@ export interface LoginParams {
 export interface LoginResponse {
   user: UserEntity;
   token: string;
+}
+
+export type Pagination<T> = {
+  rows: T[];
+  count: number;
+};
+
+export type SearchParameterBase = {
+  offset?: number;
+  limit?: number;
+  page?: number;
+  orderBy?: string;
+  isDESC?: boolean;
+  sort?: "ASC" | "DESC";
+};
+
+export interface IUsersSearchParameters extends SearchParameterBase {
+  name?: string;
+  taxIdentifier?: string;
+  type?: UserType;
 }

@@ -63,8 +63,6 @@ function Header() {
             <span
               onClick={() => {
                 session.logOut();
-
-                window.location.reload();
               }}
             >
               Logout
