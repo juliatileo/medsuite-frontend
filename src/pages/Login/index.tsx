@@ -12,6 +12,7 @@ import session from "config/session";
 
 import { LoginContainer, LoginCreateAccount } from "./styles";
 import { validateEmail } from "utils/validateEmail";
+import { AxiosError } from "axios";
 
 function Login(): JSX.Element {
   const navigate = useNavigate();
@@ -53,11 +54,36 @@ function Login(): JSX.Element {
 
       navigate("/", { replace: true });
     } catch (err) {
-      setSnackBarProps({
-        open: true,
-        message: "Ocorreu um erro ao fazer login, tente novamente.",
-        severity: "error",
-      });
+      if (err instanceof AxiosError) {
+        console.log({
+          notFound: err.response?.data.message === "User not found",
+          incorrect: err.response?.data.message === "Incorrect password",
+        });
+
+        if (err.response?.data.message === "User not found") {
+          setSnackBarProps({
+            open: true,
+            message: "Usuário com esse e-mail não encontrado no sistema.",
+            severity: "error",
+          });
+        } else if (err.response?.data.message === "Incorrect password") {
+          setSnackBarProps({
+            open: true,
+            message: "Senha incorreta. Verifique e tente novamente.",
+            severity: "error",
+          });
+        } else
+          setSnackBarProps({
+            open: true,
+            message: "Ocorreu um erro ao fazer login, tente novamente.",
+            severity: "error",
+          });
+      } else
+        setSnackBarProps({
+          open: true,
+          message: "Ocorreu um erro ao fazer login, tente novamente.",
+          severity: "error",
+        });
     }
   }
 

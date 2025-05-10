@@ -2,17 +2,24 @@ import { Search as MuiSearch } from "@mui/icons-material";
 
 import { SearchContainer, SearchInput, SearchInputForm } from "./styles";
 import { SearchProps } from "./types";
-import { useState } from "react";
 
 function Search(props: SearchProps) {
-  const [value, setValue] = useState("");
-
   return (
     <SearchContainer>
-      <SearchInputForm>
-        <SearchInput onChange={(e) => setValue(e.target.value)} value={value} />
+      <SearchInputForm
+        onSubmit={(e) => {
+          e.preventDefault();
+
+          props.submit;
+        }}
+      >
+        <SearchInput onChange={props.onChange} />
       </SearchInputForm>
-      <MuiSearch fontSize="large" sx={{ cursor: "pointer" }} />
+      <MuiSearch
+        fontSize="large"
+        sx={{ cursor: "pointer" }}
+        onClick={props.submit}
+      />
     </SearchContainer>
   );
 }

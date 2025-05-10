@@ -92,7 +92,7 @@ function Patients() {
 
   useEffect(() => {
     getPatients();
-  }, []);
+  }, [paginatedParams]);
 
   useEffect(() => {
     async function getUserById() {
@@ -315,7 +315,22 @@ function Patients() {
       ) : (
         <>
           <PatientsSearchContainer>
-            <Search />
+            <Search
+              onChange={(e) => {
+                const value = e.target.value;
+
+                clearTimeout((window as any).searchDebounceTimeout);
+
+                (window as any).searchDebounceTimeout = setTimeout(() => {
+                  setPaginatedParams({
+                    ...paginatedParams,
+                    name: value,
+                    taxIdentifier: value,
+                  });
+                }, 1000);
+              }}
+              submit={() => getPatients()}
+            />
             <PatientsContainer>
               <PatientCardContainer>
                 {patients.map((patient) => (

@@ -1,3 +1,6 @@
+import { ChangeEventHandler } from "react";
+
 export interface SearchProps {
-  submit: () => {};
+  submit: () => void;
+  onChange: ChangeEventHandler<HTMLInputElement>;
 }

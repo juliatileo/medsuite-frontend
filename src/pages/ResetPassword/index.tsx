@@ -82,6 +82,7 @@ function ResetPassword(): JSX.Element {
         await api.updateUser({ id: user.id, password, firstAccess: false });
 
         firstAccessContext.setFirstAccess(false);
+        session.updateFirstAccess();
 
         setSnackBarProps({
           open: true,

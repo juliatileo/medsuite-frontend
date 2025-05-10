@@ -22,13 +22,19 @@ class Session {
     }
   }
 
-  private storeSession(user: UserEntity, token: string, roleKey: string): void {
+  private storeSession(
+    user: UserEntity,
+    token?: string,
+    roleKey?: string
+  ): void {
     const encryptedUser = this.encryptData(JSON.stringify(user), userSecret);
     const encryptedToken = this.encryptData(JSON.stringify(token), tokenSecret);
 
     localStorage.setItem("session", encryptedUser);
-    localStorage.setItem("token", encryptedToken);
-    localStorage.setItem(roleKey, "true");
+
+    if (token) localStorage.setItem("token", encryptedToken);
+
+    if (roleKey) localStorage.setItem(roleKey, "true");
 
     window.location.reload();
   }
@@ -60,6 +66,22 @@ class Session {
     return user?.firstAccess || false;
   }
 
+  public updateFirstAccess(): void {
+    if (this.isSessionValid()) {
+      const encryptedUser = localStorage.getItem("session");
+
+      if (encryptedUser) {
+        const decryptedUser = this.decryptData(encryptedUser, userSecret);
+
+        if (decryptedUser)
+          this.storeSession({
+            ...JSON.parse(decryptedUser),
+            firstAccess: false,
+          });
+      }
+    }
+  }
+
   public logInAsPatient(user: UserEntity, token: string): void {
     if (!this.isSessionActive() && userSecret && tokenSecret) {
       this.storeSession(user, token, "isPatient");
@@ -78,9 +100,8 @@ class Session {
 
       if (encryptedUser) {
         const decryptedUser = this.decryptData(encryptedUser, userSecret);
-        if (decryptedUser) {
-          return JSON.parse(decryptedUser) as UserEntity;
-        }
+
+        if (decryptedUser) return JSON.parse(decryptedUser) as UserEntity;
       }
     }
 
@@ -93,9 +114,8 @@ class Session {
 
       if (encryptedToken) {
         const decryptedToken = this.decryptData(encryptedToken, tokenSecret);
-        if (decryptedToken) {
-          return decryptedToken.replace(/"/g, "");
-        }
+
+        if (decryptedToken) return decryptedToken.replace(/"/g, "");
       }
     }
 
