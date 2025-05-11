@@ -6,20 +6,10 @@ import { SearchProps } from "./types";
 function Search(props: SearchProps) {
   return (
     <SearchContainer>
-      <SearchInputForm
-        onSubmit={(e) => {
-          e.preventDefault();
-
-          props.submit;
-        }}
-      >
-        <SearchInput onChange={props.onChange} />
+      <SearchInputForm onSubmit={(e) => e.preventDefault()}>
+        <SearchInput onChange={props.onChange} placeholder="Pesquise aqui..." />
       </SearchInputForm>
-      <MuiSearch
-        fontSize="large"
-        sx={{ cursor: "pointer" }}
-        onClick={props.submit}
-      />
+      <MuiSearch fontSize="large" sx={{ cursor: "pointer" }} />
     </SearchContainer>
   );
 }

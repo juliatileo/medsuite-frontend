@@ -15,7 +15,7 @@ import { ISnackBarParams } from "components/SnackBar/types";
 import Search from "components/Search";
 
 import api from "config/api";
-import { IUsersSearchParameters, UserEntity, UserType } from "config/api/dto";
+import { IUserSearchParameters, UserEntity, UserType } from "config/api/dto";
 
 import { abbreviateName } from "utils/abbreviateName";
 import { bloodTypes, sexes } from "utils/types";
@@ -66,12 +66,13 @@ function Patients() {
     message: "",
     severity: "success",
   });
-  const [paginatedParams, setPaginatedParams] =
-    useState<IUsersSearchParameters>({
+  const [paginatedParams, setPaginatedParams] = useState<IUserSearchParameters>(
+    {
       offset: 0,
       limit: 10,
       type: UserType.PATIENT,
-    });
+    }
+  );
 
   const handleOpenEditPatient = () => setOpenEditPatient(true);
   const handleCloseEditPatient = () => {
@@ -83,7 +84,7 @@ function Patients() {
   const handleCloseCreatePatient = () => setOpenCreatePatient(false);
 
   async function getPatients() {
-    const res = await api.getPaginated(paginatedParams);
+    const res = await api.getUsersPaginated(paginatedParams);
 
     setPatients(res.data.rows);
 
@@ -329,7 +330,6 @@ function Patients() {
                   });
                 }, 1000);
               }}
-              submit={() => getPatients()}
             />
             <PatientsContainer>
               <PatientCardContainer>

@@ -17,6 +17,10 @@ export const DrawerContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+
+  @media (max-width: 720px) {
+    width: 70vw;
+  }
 `;
 
 export const LogOutContainer = styled.div`

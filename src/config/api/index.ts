@@ -4,12 +4,12 @@ import session from "config/session";
 
 import {
   AppointmentEntity,
-  IUsersSearchParameters,
+  IAppointmentSearchParameters,
+  IUserSearchParameters,
   LoginParams,
   LoginResponse,
   Pagination,
   UserEntity,
-  UserType,
 } from "./dto";
 import { DateTime } from "luxon";
 import { formatParams } from "utils/formatParams";
@@ -52,8 +52,8 @@ class API {
     return this.api.put("user", body);
   }
 
-  async getPaginated(
-    params: IUsersSearchParameters
+  async getUsersPaginated(
+    params: IUserSearchParameters
   ): Promise<AxiosResponse<Pagination<UserEntity>>> {
     const paramsString: string = formatParams(params);
 
@@ -98,6 +98,14 @@ class API {
     patientId: string
   ): Promise<AxiosResponse<AppointmentEntity[]>> {
     return this.api.get(`appointment/patient/${patientId}`);
+  }
+
+  async getAppointmentsPaginated(
+    params: IAppointmentSearchParameters
+  ): Promise<AxiosResponse<Pagination<AppointmentEntity>>> {
+    const paramsString: string = formatParams(params);
+
+    return this.api.get(`appointment/get-paginated?${paramsString}`);
   }
 
   async listAppointmentsByDate(

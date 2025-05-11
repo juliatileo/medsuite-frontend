@@ -12,7 +12,7 @@ export const PatientsSearchContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 20px;
+  margin-top: 30px;
 `;
 
 export const PatientCardContainer = styled.div`
@@ -20,7 +20,7 @@ export const PatientCardContainer = styled.div`
   flex-wrap: wrap;
   width: 80%;
   justify-content: space-between;
-  row-gap: 20px;
+  row-gap: 30px;
   margin-top: 30px;
 `;
 

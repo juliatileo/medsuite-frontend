@@ -31,6 +31,8 @@ export interface AppointmentEntity {
   description: string;
   patientId: string;
   doctorId: string;
+  Doctor: UserEntity;
+  Patient: UserEntity;
 }
 
 export interface LoginParams {
@@ -57,8 +59,13 @@ export type SearchParameterBase = {
   sort?: "ASC" | "DESC";
 };
 
-export interface IUsersSearchParameters extends SearchParameterBase {
+export interface IUserSearchParameters extends SearchParameterBase {
   name?: string;
   taxIdentifier?: string;
   type?: UserType;
+}
+
+export interface IAppointmentSearchParameters extends SearchParameterBase {
+  patientName?: string;
+  doctorName?: string;
 }
