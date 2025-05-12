@@ -68,8 +68,6 @@ function Patients() {
   });
   const [paginatedParams, setPaginatedParams] = useState<IUserSearchParameters>(
     {
-      offset: 0,
-      limit: 10,
       type: UserType.PATIENT,
     }
   );
@@ -86,7 +84,7 @@ function Patients() {
   async function getPatients() {
     const res = await api.getUsersPaginated(paginatedParams);
 
-    setPatients(res.data.rows);
+    setPatients(res.data);
 
     setLoading(false);
   }

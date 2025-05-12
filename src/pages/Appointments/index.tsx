@@ -23,9 +23,6 @@ function Appointments() {
 
   const [paginatedParams, setPaginatedParams] =
     useState<IAppointmentSearchParameters>({
-      offset: 0,
-      limit: 10,
-      page: 0,
       [field]: user ? user.id : undefined,
     });
   const [appointments, setAppointments] = useState<AppointmentEntity[]>([]);
@@ -39,7 +36,7 @@ function Appointments() {
   async function getAppointments() {
     const response = await api.getAppointmentsPaginated(paginatedParams);
 
-    setAppointments(response.data.rows);
+    setAppointments(response.data);
     setLoading(false);
   }
 

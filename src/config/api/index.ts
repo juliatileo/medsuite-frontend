@@ -8,7 +8,6 @@ import {
   IUserSearchParameters,
   LoginParams,
   LoginResponse,
-  Pagination,
   UserEntity,
 } from "./dto";
 import { DateTime } from "luxon";
@@ -54,7 +53,7 @@ class API {
 
   async getUsersPaginated(
     params: IUserSearchParameters
-  ): Promise<AxiosResponse<Pagination<UserEntity>>> {
+  ): Promise<AxiosResponse<UserEntity[]>> {
     const paramsString: string = formatParams(params);
 
     return this.api.get(`user/get-paginated?${paramsString}`);
@@ -102,7 +101,7 @@ class API {
 
   async getAppointmentsPaginated(
     params: IAppointmentSearchParameters
-  ): Promise<AxiosResponse<Pagination<AppointmentEntity>>> {
+  ): Promise<AxiosResponse<AppointmentEntity[]>> {
     const paramsString: string = formatParams(params);
 
     return this.api.get(`appointment/get-paginated?${paramsString}`);
