@@ -25,14 +25,23 @@ export interface UserEntity {
   patientInfo?: PatientInfoEntity;
 }
 
+export enum AppointmentStatus {
+  SCHEDULED = 1,
+  CANCELED = 2,
+  PENDING_DONE = 4,
+  DONE = 3,
+}
+
 export interface AppointmentEntity {
   id: string;
   date: string;
   description: string;
+  status: AppointmentStatus;
   patientId: string;
   doctorId: string;
   Doctor: UserEntity;
   Patient: UserEntity;
+  createdAt: string;
 }
 
 export interface LoginParams {

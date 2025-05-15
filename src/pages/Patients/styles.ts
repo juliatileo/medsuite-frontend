@@ -53,6 +53,7 @@ export const PatientName = styled.span`
   font-weight: bold;
   font-size: 20px;
   margin-left: 15px;
+  width: 200px;
 `;
 
 export const DateContainer = styled.div`

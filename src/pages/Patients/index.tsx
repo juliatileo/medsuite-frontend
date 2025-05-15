@@ -72,14 +72,11 @@ function Patients() {
     }
   );
 
-  const handleOpenEditPatient = () => setOpenEditPatient(true);
   const handleCloseEditPatient = () => {
     setSelectedPatient(null);
     setSelectedPatientId(null);
     setOpenEditPatient(false);
   };
-  const handleOpenCreatePatient = () => setOpenCreatePatient(true);
-  const handleCloseCreatePatient = () => setOpenCreatePatient(false);
 
   async function getPatients() {
     const res = await api.getUsersPaginated(paginatedParams);
@@ -225,7 +222,7 @@ function Patients() {
     try {
       await api.saveUser(createPatient);
 
-      handleCloseCreatePatient();
+      setOpenCreatePatient(false);
     } catch (err) {
       setSnackBarProps({
         open: true,
@@ -347,7 +344,7 @@ function Patients() {
                         }}
                         onClick={() => {
                           setSelectedPatientId(patient.id!);
-                          handleOpenEditPatient();
+                          setOpenEditPatient(true);
                         }}
                       />
                       <MuiDelete
@@ -366,7 +363,7 @@ function Patients() {
               </PatientCardContainer>
             </PatientsContainer>
           </PatientsSearchContainer>
-          <CreatePatientButton onClick={handleOpenCreatePatient}>
+          <CreatePatientButton onClick={() => setOpenCreatePatient(true)}>
             ADICIONAR PACIENTE
           </CreatePatientButton>
           <Modal open={openEditPatient} onClose={handleCloseEditPatient}>
@@ -529,7 +526,10 @@ function Patients() {
               />
             </ModalContainer>
           </Modal>
-          <Modal open={openCreatePatient} onClose={handleCloseCreatePatient}>
+          <Modal
+            open={openCreatePatient}
+            onClose={() => setOpenCreatePatient(false)}
+          >
             <ModalContainer>
               <span>Criar paciente</span>
               <ModalInputsContainer>

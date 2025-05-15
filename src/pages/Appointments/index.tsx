@@ -1,21 +1,31 @@
+import { Check as MuiCheck, Clear as MuiX } from "@mui/icons-material";
+import { useEffect, useState } from "react";
+import { Box, Modal, Skeleton } from "@mui/material";
+import { DateTime } from "luxon";
+
 import Header from "components/Header";
 import Search from "components/Search";
 
 import {
-  AppointmentCard,
-  AppointmentCardContainer,
-  AppointmentsContainer,
-} from "./styles";
-import { useEffect, useState } from "react";
-import {
   AppointmentEntity,
+  AppointmentStatus,
   IAppointmentSearchParameters,
 } from "config/api/dto";
 import api from "config/api";
 import session from "config/session";
 import SnackBar from "components/SnackBar";
 import { ISnackBarParams } from "components/SnackBar/types";
-import { Box, Skeleton } from "@mui/material";
+import {
+  DateContainer,
+  ModalContainer,
+  PatientCard,
+  PatientCardContainer,
+  PatientName,
+  PatientsContainer,
+  PatientsSearchContainer,
+} from "pages/Patients/styles";
+import { abbreviateName } from "utils/abbreviateName";
+import { formatRelativeDate } from "utils/formatRelativeDate";
 
 function Appointments() {
   const user = session.getUserInfo();
@@ -40,12 +50,41 @@ function Appointments() {
     setLoading(false);
   }
 
+  async function markAppointmentAsDone(appointmentId: string) {
+    try {
+      await api.saveAppointment({
+        id: appointmentId,
+        status: AppointmentStatus.DONE,
+      });
+
+      await getAppointments();
+
+      setSnackBarProps({
+        open: true,
+        message: "Consulta marcada como pronta!",
+        severity: "success",
+      });
+    } catch {
+      setSnackBarProps({
+        open: true,
+        message: "Ocorreu um erro inesperado. Tente novamente.",
+        severity: "error",
+      });
+    }
+  }
+
   useEffect(() => {
     getAppointments();
   }, [paginatedParams]);
 
   return (
     <>
+      {/* <Modal
+        open={openCreatePatient}
+        onClose={() => setOpenCreatePatient(false)}
+      >
+        <ModalContainer></ModalContainer>
+      </Modal> */}
       <Header />
       <SnackBar
         severity={snackBarProps.severity}
@@ -74,7 +113,7 @@ function Appointments() {
           <Skeleton variant="rectangular" width={800} height={250} />
         </Box>
       ) : (
-        <AppointmentsContainer>
+        <PatientsSearchContainer>
           <Search
             onChange={(e) => {
               const value = e.target.value;
@@ -90,12 +129,54 @@ function Appointments() {
               }, 1000);
             }}
           />
-          <AppointmentCardContainer>
-            {appointments.map((appointment) => (
-              <AppointmentCard>{appointment.Patient.name}</AppointmentCard>
-            ))}
-          </AppointmentCardContainer>
-        </AppointmentsContainer>
+          <PatientsContainer>
+            <PatientCardContainer>
+              {appointments.map((appointment: AppointmentEntity) => (
+                <PatientCard key={appointment.id}>
+                  <PatientName>
+                    {abbreviateName(appointment.Patient.name)}
+                  </PatientName>
+                  teste
+                  <DateContainer>
+                    <span>
+                      {formatRelativeDate(DateTime.fromISO(appointment.date!))}
+                    </span>
+                    {[
+                      AppointmentStatus.PENDING_DONE,
+                      AppointmentStatus.SCHEDULED,
+                    ].includes(appointment.status) ? (
+                      <>
+                        <MuiCheck
+                          fontSize="medium"
+                          sx={{
+                            cursor: "pointer",
+                            color: "#588157",
+                          }}
+                          onClick={async () => {
+                            await markAppointmentAsDone(appointment.id);
+                          }}
+                        />
+                        <MuiX
+                          fontSize="medium"
+                          sx={{
+                            cursor: "pointer",
+                            color: "crimson",
+                          }}
+                          onClick={() => {
+                            // setSelectedPatientId(patient.id!);
+                            // handleOpenEditPatient();
+                          }}
+                        />
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                  </DateContainer>
+                </PatientCard>
+              ))}
+            </PatientCardContainer>
+          </PatientsContainer>
+        </PatientsSearchContainer>
       )}
     </>
   );
