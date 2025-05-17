@@ -32,6 +32,16 @@ export enum AppointmentStatus {
   DONE = 3,
 }
 
+export const AppointmentStatusMap: Map<number, string> = new Map<
+  number,
+  string
+>([
+  [AppointmentStatus.SCHEDULED, "Agendada"],
+  [AppointmentStatus.CANCELED, "Cancelada"],
+  [AppointmentStatus.PENDING_DONE, "Pendente"],
+  [AppointmentStatus.DONE, "Concluída"],
+]);
+
 export interface AppointmentEntity {
   id: string;
   date: string;

@@ -62,6 +62,7 @@ export const DateContainer = styled.div`
   align-items: center;
   margin-right: 15px;
   column-gap: 10px;
+  width: 120px;
 `;
 
 export const CreatePatientButton = styled.button`

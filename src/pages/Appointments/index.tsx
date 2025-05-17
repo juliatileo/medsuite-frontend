@@ -9,6 +9,7 @@ import Search from "components/Search";
 import {
   AppointmentEntity,
   AppointmentStatus,
+  AppointmentStatusMap,
   IAppointmentSearchParameters,
 } from "config/api/dto";
 import api from "config/api";
@@ -26,6 +27,9 @@ import {
 } from "pages/Patients/styles";
 import { abbreviateName } from "utils/abbreviateName";
 import { formatRelativeDate } from "utils/formatRelativeDate";
+import { RelativeDate, Status, DescriptionForm } from "./styles";
+import Input from "components/Input";
+import Button from "components/Button";
 
 function Appointments() {
   const user = session.getUserInfo();
@@ -42,6 +46,8 @@ function Appointments() {
     message: "",
     severity: "success",
   });
+  const [openModal, setOpenModal] = useState(false);
+  const [description, setDescription] = useState("");
 
   async function getAppointments() {
     const response = await api.getAppointmentsPaginated(paginatedParams);
@@ -79,12 +85,23 @@ function Appointments() {
 
   return (
     <>
-      {/* <Modal
-        open={openCreatePatient}
-        onClose={() => setOpenCreatePatient(false)}
-      >
-        <ModalContainer></ModalContainer>
-      </Modal> */}
+      <Modal open={openModal} onClose={() => setOpenModal(false)}>
+        <ModalContainer>
+          <h2>Adicione uma descrição (opcional)</h2>
+          <DescriptionForm>
+            <Input
+              placeholder="Descrição"
+              width="70%"
+              height="50px"
+              type="text"
+              onChange={(e) => {
+                setDescription(e.target.value);
+              }}
+            />
+            <Button text="CONCLUÍDO" width="200px" height="50px" />
+          </DescriptionForm>
+        </ModalContainer>
+      </Modal>
       <Header />
       <SnackBar
         severity={snackBarProps.severity}
@@ -136,11 +153,13 @@ function Appointments() {
                   <PatientName>
                     {abbreviateName(appointment.Patient.name)}
                   </PatientName>
-                  teste
+                  <Status status={appointment.status}>
+                    {AppointmentStatusMap.get(appointment.status)}
+                  </Status>
                   <DateContainer>
-                    <span>
+                    <RelativeDate>
                       {formatRelativeDate(DateTime.fromISO(appointment.date!))}
-                    </span>
+                    </RelativeDate>
                     {[
                       AppointmentStatus.PENDING_DONE,
                       AppointmentStatus.SCHEDULED,
@@ -153,7 +172,7 @@ function Appointments() {
                             color: "#588157",
                           }}
                           onClick={async () => {
-                            await markAppointmentAsDone(appointment.id);
+                            setOpenModal(true);
                           }}
                         />
                         <MuiX
@@ -163,8 +182,7 @@ function Appointments() {
                             color: "crimson",
                           }}
                           onClick={() => {
-                            // setSelectedPatientId(patient.id!);
-                            // handleOpenEditPatient();
+                            setOpenModal(true);
                           }}
                         />
                       </>
