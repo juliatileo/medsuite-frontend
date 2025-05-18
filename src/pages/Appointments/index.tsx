@@ -46,7 +46,13 @@ function Appointments() {
     message: "",
     severity: "success",
   });
-  const [openModal, setOpenModal] = useState(false);
+  const [modalOptions, setModalOptions] = useState<{
+    open: boolean;
+    status?: AppointmentStatus;
+    appointmentId?: string;
+  }>({
+    open: false,
+  });
   const [description, setDescription] = useState("");
 
   async function getAppointments() {
@@ -56,18 +62,26 @@ function Appointments() {
     setLoading(false);
   }
 
-  async function markAppointmentAsDone(appointmentId: string) {
+  async function markAppointmentAsStatus(
+    appointmentId: string,
+    status: AppointmentStatus
+  ) {
+    const messageStatus =
+      status === AppointmentStatus.DONE ? "pronta" : "cancelada";
+
     try {
       await api.saveAppointment({
         id: appointmentId,
-        status: AppointmentStatus.DONE,
+        status,
+        description,
       });
 
       await getAppointments();
+      setModalOptions({ open: false });
 
       setSnackBarProps({
         open: true,
-        message: "Consulta marcada como pronta!",
+        message: `Consulta marcada como ${messageStatus}!`,
         severity: "success",
       });
     } catch {
@@ -79,16 +93,102 @@ function Appointments() {
     }
   }
 
+  function handleOptions(appointment: AppointmentEntity): JSX.Element {
+    if (
+      [AppointmentStatus.PENDING_DONE, AppointmentStatus.SCHEDULED].includes(
+        appointment.status
+      )
+    ) {
+      console.log({
+        date: DateTime.fromSQL(appointment.date),
+        now: DateTime.now(),
+      });
+
+      if (DateTime.fromISO(appointment.date) < DateTime.now()) {
+        return (
+          <>
+            <MuiCheck
+              fontSize="medium"
+              sx={{
+                cursor: "pointer",
+                color: "#588157",
+              }}
+              onClick={async () => {
+                setModalOptions({
+                  ...modalOptions,
+                  open: true,
+                  status: AppointmentStatus.DONE,
+                  appointmentId: appointment.id,
+                });
+              }}
+            />
+            <MuiX
+              fontSize="medium"
+              sx={{
+                cursor: "pointer",
+                color: "crimson",
+              }}
+              onClick={() => {
+                setModalOptions({
+                  ...modalOptions,
+                  open: true,
+                  status: AppointmentStatus.CANCELED,
+                  appointmentId: appointment.id,
+                });
+              }}
+            />
+          </>
+        );
+      } else {
+        return (
+          <>
+            <MuiX
+              fontSize="medium"
+              sx={{
+                cursor: "pointer",
+                color: "crimson",
+              }}
+              onClick={() => {
+                setModalOptions({
+                  ...modalOptions,
+                  open: true,
+                  status: AppointmentStatus.CANCELED,
+                  appointmentId: appointment.id,
+                });
+              }}
+            />
+          </>
+        );
+      }
+    } else {
+      return <></>;
+    }
+  }
+
   useEffect(() => {
     getAppointments();
   }, [paginatedParams]);
 
   return (
     <>
-      <Modal open={openModal} onClose={() => setOpenModal(false)}>
+      <Modal
+        open={modalOptions.open}
+        onClose={() => setModalOptions({ ...modalOptions, open: false })}
+      >
         <ModalContainer>
           <h2>Adicione uma descrição (opcional)</h2>
-          <DescriptionForm>
+          <DescriptionForm
+            onSubmit={async (e) => {
+              e.preventDefault();
+
+              if (modalOptions.status && modalOptions.appointmentId) {
+                await markAppointmentAsStatus(
+                  modalOptions.appointmentId,
+                  modalOptions.status
+                );
+              }
+            }}
+          >
             <Input
               placeholder="Descrição"
               width="70%"
@@ -160,35 +260,7 @@ function Appointments() {
                     <RelativeDate>
                       {formatRelativeDate(DateTime.fromISO(appointment.date!))}
                     </RelativeDate>
-                    {[
-                      AppointmentStatus.PENDING_DONE,
-                      AppointmentStatus.SCHEDULED,
-                    ].includes(appointment.status) ? (
-                      <>
-                        <MuiCheck
-                          fontSize="medium"
-                          sx={{
-                            cursor: "pointer",
-                            color: "#588157",
-                          }}
-                          onClick={async () => {
-                            setOpenModal(true);
-                          }}
-                        />
-                        <MuiX
-                          fontSize="medium"
-                          sx={{
-                            cursor: "pointer",
-                            color: "crimson",
-                          }}
-                          onClick={() => {
-                            setOpenModal(true);
-                          }}
-                        />
-                      </>
-                    ) : (
-                      <></>
-                    )}
+                    {handleOptions(appointment)}
                   </DateContainer>
                 </PatientCard>
               ))}
