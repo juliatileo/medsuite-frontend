@@ -38,9 +38,17 @@ export const AppointmentStatusMap: Map<number, string> = new Map<
 >([
   [AppointmentStatus.SCHEDULED, "Agendada"],
   [AppointmentStatus.CANCELED, "Cancelada"],
-  [AppointmentStatus.PENDING_DONE, "Pendente"],
   [AppointmentStatus.DONE, "Concluída"],
+  [AppointmentStatus.PENDING_DONE, "Pendente"],
 ]);
+
+export const AppointmentStatusReverseMap: Map<string, AppointmentStatus> =
+  new Map<string, AppointmentStatus>([
+    ["Agendada", AppointmentStatus.SCHEDULED],
+    ["Cancelada", AppointmentStatus.CANCELED],
+    ["Concluída", AppointmentStatus.DONE],
+    ["Pendente", AppointmentStatus.PENDING_DONE],
+  ]);
 
 export interface AppointmentEntity {
   id: string;
@@ -52,6 +60,7 @@ export interface AppointmentEntity {
   Doctor: UserEntity;
   Patient: UserEntity;
   createdAt: string;
+  initialStatus?: AppointmentStatus;
 }
 
 export interface LoginParams {

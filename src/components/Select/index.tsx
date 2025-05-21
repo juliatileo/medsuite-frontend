@@ -9,6 +9,7 @@ function Select(props: SelectProps): JSX.Element {
       onChange={props.onChange}
       center={props.center === "true" ? true : false}
       value={props.value}
+      disabled={props.disabled}
     >
       {props.options.map((option, index) => (
         <option key={index} value={option}>

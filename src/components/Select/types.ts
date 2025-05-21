@@ -5,4 +5,5 @@ export interface SelectProps {
   options: string[];
   center?: string;
   value?: string;
+  disabled?: boolean;
 }
