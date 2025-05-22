@@ -21,6 +21,7 @@ import { abbreviateName } from "utils/abbreviateName";
 import { formatRelativeDate } from "utils/formatRelativeDate";
 
 import {
+  CreatePatientButton,
   ModalContainer,
   PatientCardContainer,
   PatientName,
@@ -351,6 +352,9 @@ function Appointments() {
         </Box>
       ) : (
         <PatientsSearchContainer>
+          <CreatePatientButton onClick={() => {}}>
+            ADICIONAR CONSULTA
+          </CreatePatientButton>
           <Search
             onChange={(e) => {
               const value = e.target.value;
