@@ -51,6 +51,10 @@ class API {
     return this.api.put("user", body);
   }
 
+  async listPatients(): Promise<AxiosResponse<UserEntity[]>> {
+    return this.api.get("user/patients");
+  }
+
   async getUsersPaginated(
     params: IUserSearchParameters
   ): Promise<AxiosResponse<UserEntity[]>> {

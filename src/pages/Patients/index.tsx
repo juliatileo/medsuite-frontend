@@ -495,7 +495,10 @@ function Patients() {
                       patientInfoField: true,
                     });
                   }}
-                  options={bloodTypes}
+                  options={bloodTypes.map((type) => ({
+                    value: type,
+                    id: type,
+                  }))}
                 />
                 <Select
                   value={
@@ -513,7 +516,10 @@ function Patients() {
                       patientInfoField: true,
                     });
                   }}
-                  options={sexes}
+                  options={sexes.map((type) => ({
+                    value: type,
+                    id: type,
+                  }))}
                 />
               </ModalInputsContainer>
               <Button
@@ -635,7 +641,13 @@ function Patients() {
                       createPatient: true,
                     });
                   }}
-                  options={["Selecione o tipo sanguíneo", ...bloodTypes]}
+                  options={[
+                    { value: "Selecione o tipo sanguíneo", id: "" },
+                    ...bloodTypes.map((type) => ({
+                      value: type,
+                      id: type,
+                    })),
+                  ]}
                 />
                 <Input
                   placeholder="Altura"
@@ -684,7 +696,10 @@ function Patients() {
                       createPatient: true,
                     });
                   }}
-                  options={["Selecione o sexo", ...sexes]}
+                  options={[
+                    { value: "Selecione o sexo", id: "" },
+                    ...sexes.map((sex) => ({ id: sex, value: sex })),
+                  ]}
                 />
               </ModalInputsContainer>
               <Button

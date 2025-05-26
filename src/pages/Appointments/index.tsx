@@ -15,6 +15,7 @@ import {
   AppointmentStatusMap,
   AppointmentStatusReverseMap,
   IAppointmentSearchParameters,
+  UserEntity,
 } from "config/api/dto";
 
 import { abbreviateName } from "utils/abbreviateName";
@@ -54,6 +55,7 @@ function Appointments() {
       [field]: user ? user.id : undefined,
     });
   const [appointments, setAppointments] = useState<AppointmentEntity[]>([]);
+  const [patients, setPatients] = useState<UserEntity[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [snackBarProps, setSnackBarProps] = useState<ISnackBarParams>({
     open: false,
@@ -72,9 +74,13 @@ function Appointments() {
   }>({
     open: false,
   });
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const [description, setDescription] = useState("");
   const [appointment, setAppointment] = useState<AppointmentEntity | null>(
     null
+  );
+  const [createAppointment, setCreateAppointment] = useState<AppointmentEntity>(
+    {} as AppointmentEntity
   );
 
   async function getAppointments() {
@@ -137,6 +143,14 @@ function Appointments() {
         });
       }
     }
+  }
+
+  async function getPatients() {
+    const res = await api.listPatients();
+
+    setPatients(res.data);
+
+    setLoading(false);
   }
 
   function handleOptions(appointment: AppointmentEntity): JSX.Element {
@@ -209,9 +223,10 @@ function Appointments() {
 
   useEffect(() => {
     getAppointments();
+    getPatients();
   }, [paginatedParams]);
 
-  console.log(appointment);
+  console.log({ createAppointment });
 
   return (
     <>
@@ -309,15 +324,55 @@ function Appointments() {
               }}
               options={[
                 ...(appointment
-                  ? [AppointmentStatusMap.get(appointment.initialStatus!) || ""]
+                  ? [
+                      {
+                        value:
+                          AppointmentStatusMap.get(
+                            appointment.initialStatus!
+                          ) || "",
+                        id: "",
+                      },
+                    ]
                   : []),
                 ...[AppointmentStatus.CANCELED, AppointmentStatus.DONE].map(
-                  (status) => AppointmentStatusMap.get(status) || ""
+                  (status) => ({
+                    value: AppointmentStatusMap.get(status) || "",
+                    id: "",
+                  })
                 ),
               ]}
               value={
                 appointment ? AppointmentStatusMap.get(appointment.status!) : ""
               }
+            />
+            <Button text="CONCLUÍDO" width="200px" height="50px" />
+          </DescriptionForm>
+        </ModalContainer>
+      </Modal>
+      <Modal open={createModalOpen} onClose={() => setCreateModalOpen(false)}>
+        <ModalContainer>
+          <h2>Criar consulta</h2>
+          <DescriptionForm
+            onSubmit={async (e) => {
+              e.preventDefault();
+              await updateAppointment();
+            }}
+          >
+            <Select
+              height="50px"
+              width="50%"
+              onChange={(e) => {
+                console.log(e.target.id);
+
+                setCreateAppointment({
+                  ...createAppointment,
+                  patientId: e.target.id,
+                });
+              }}
+              options={patients.map((patient) => ({
+                value: patient.name,
+                id: patient.id!,
+              }))}
             />
             <Button text="CONCLUÍDO" width="200px" height="50px" />
           </DescriptionForm>
@@ -352,7 +407,7 @@ function Appointments() {
         </Box>
       ) : (
         <PatientsSearchContainer>
-          <CreatePatientButton onClick={() => {}}>
+          <CreatePatientButton onClick={() => setCreateModalOpen(true)}>
             ADICIONAR CONSULTA
           </CreatePatientButton>
           <Search
