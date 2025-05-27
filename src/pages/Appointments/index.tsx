@@ -67,7 +67,7 @@ function Appointments() {
     status: AppointmentStatus
   ) {
     const messageStatus =
-      status === AppointmentStatus.DONE ? "pronta" : "cancelada";
+      status === AppointmentStatus.DONE ? "concluída" : "cancelada";
 
     try {
       await api.saveAppointment({
