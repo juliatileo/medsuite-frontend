@@ -46,6 +46,7 @@ export const PatientCard = styled.div`
 
   @media (max-width: 720px) {
     width: 100%;
+    height: 150px;
   }
 `;
 
@@ -54,6 +55,10 @@ export const PatientName = styled.span`
   font-size: 20px;
   margin-left: 15px;
   width: 200px;
+
+  @media (max-width: 720px) {
+    width: 130px;
+  }
 `;
 
 export const DateContainer = styled.div`
@@ -62,15 +67,7 @@ export const DateContainer = styled.div`
   align-items: center;
   margin-right: 15px;
   column-gap: 10px;
-  width: 120px;
-
-  @media (max-width: 1920px) {
-    width: 150px;
-  }
-
-  @media (max-width: 1366px) {
-    width: 150px;
-  }
+  width: 150px;
 
   @media (max-width: 1280px) {
     width: 180px;

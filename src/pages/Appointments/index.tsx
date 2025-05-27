@@ -1,35 +1,50 @@
-import { Check as MuiCheck, Clear as MuiX } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import { Box, Modal, Skeleton } from "@mui/material";
+import {
+  Check as MuiCheck,
+  Clear as MuiX,
+  Visibility as MuiVisibility,
+} from "@mui/icons-material";
 import { DateTime } from "luxon";
 
-import Header from "components/Header";
-import Search from "components/Search";
-
+import api from "config/api";
+import session from "config/session";
 import {
   AppointmentEntity,
   AppointmentStatus,
   AppointmentStatusMap,
+  AppointmentStatusReverseMap,
   IAppointmentSearchParameters,
+  UserEntity,
 } from "config/api/dto";
-import api from "config/api";
-import session from "config/session";
-import SnackBar from "components/SnackBar";
-import { ISnackBarParams } from "components/SnackBar/types";
+
+import { abbreviateName } from "utils/abbreviateName";
+import { formatRelativeDate } from "utils/formatRelativeDate";
+
 import {
-  DateContainer,
+  CreatePatientButton,
   ModalContainer,
-  PatientCard,
   PatientCardContainer,
   PatientName,
   PatientsContainer,
   PatientsSearchContainer,
 } from "pages/Patients/styles";
-import { abbreviateName } from "utils/abbreviateName";
-import { formatRelativeDate } from "utils/formatRelativeDate";
-import { RelativeDate, Status, DescriptionForm } from "./styles";
+
+import Header from "components/Header";
+import Search from "components/Search";
+import SnackBar from "components/SnackBar";
+import { ISnackBarParams } from "components/SnackBar/types";
 import Input from "components/Input";
 import Button from "components/Button";
+
+import {
+  RelativeDate,
+  Status,
+  DescriptionForm,
+  DateContainer,
+  AppointmentCard,
+} from "./styles";
+import Select from "components/Select";
 
 function Appointments() {
   const user = session.getUserInfo();
@@ -40,20 +55,33 @@ function Appointments() {
       [field]: user ? user.id : undefined,
     });
   const [appointments, setAppointments] = useState<AppointmentEntity[]>([]);
+  const [patients, setPatients] = useState<UserEntity[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [snackBarProps, setSnackBarProps] = useState<ISnackBarParams>({
     open: false,
     message: "",
     severity: "success",
   });
-  const [modalOptions, setModalOptions] = useState<{
+  const [descriptionModalOptions, setDescriptionModalOptions] = useState<{
     open: boolean;
     status?: AppointmentStatus;
     appointmentId?: string;
   }>({
     open: false,
   });
+  const [updateModalOptions, setUpdateModalOptions] = useState<{
+    open: boolean;
+  }>({
+    open: false,
+  });
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const [description, setDescription] = useState("");
+  const [appointment, setAppointment] = useState<AppointmentEntity | null>(
+    null
+  );
+  const [createAppointment, setCreateAppointment] = useState<AppointmentEntity>(
+    {} as AppointmentEntity
+  );
 
   async function getAppointments() {
     const response = await api.getAppointmentsPaginated(paginatedParams);
@@ -77,8 +105,8 @@ function Appointments() {
       });
 
       await getAppointments();
-      setModalOptions({ open: false });
 
+      setDescriptionModalOptions({ open: false });
       setSnackBarProps({
         open: true,
         message: `Consulta marcada como ${messageStatus}!`,
@@ -93,17 +121,45 @@ function Appointments() {
     }
   }
 
+  async function updateAppointment() {
+    if (appointment) {
+      try {
+        await api.saveAppointment(appointment);
+
+        await getAppointments();
+
+        setUpdateModalOptions({ open: false });
+        setAppointment(null);
+        setSnackBarProps({
+          open: true,
+          message: "Consulta atualizada com sucesso!",
+          severity: "success",
+        });
+      } catch {
+        setSnackBarProps({
+          open: true,
+          message: "Ocorreu um erro inesperado. Tente novamente.",
+          severity: "error",
+        });
+      }
+    }
+  }
+
+  async function getPatients() {
+    const res = await api.listPatients();
+
+    setPatients(res.data);
+
+    setLoading(false);
+  }
+
   function handleOptions(appointment: AppointmentEntity): JSX.Element {
     if (
       [AppointmentStatus.PENDING_DONE, AppointmentStatus.SCHEDULED].includes(
         appointment.status
-      )
+      ) &&
+      session.isDoctor()
     ) {
-      console.log({
-        date: DateTime.fromSQL(appointment.date),
-        now: DateTime.now(),
-      });
-
       if (DateTime.fromISO(appointment.date) < DateTime.now()) {
         return (
           <>
@@ -114,8 +170,8 @@ function Appointments() {
                 color: "#588157",
               }}
               onClick={async () => {
-                setModalOptions({
-                  ...modalOptions,
+                setDescriptionModalOptions({
+                  ...descriptionModalOptions,
                   open: true,
                   status: AppointmentStatus.DONE,
                   appointmentId: appointment.id,
@@ -129,8 +185,8 @@ function Appointments() {
                 color: "crimson",
               }}
               onClick={() => {
-                setModalOptions({
-                  ...modalOptions,
+                setDescriptionModalOptions({
+                  ...descriptionModalOptions,
                   open: true,
                   status: AppointmentStatus.CANCELED,
                   appointmentId: appointment.id,
@@ -149,8 +205,8 @@ function Appointments() {
                 color: "crimson",
               }}
               onClick={() => {
-                setModalOptions({
-                  ...modalOptions,
+                setDescriptionModalOptions({
+                  ...descriptionModalOptions,
                   open: true,
                   status: AppointmentStatus.CANCELED,
                   appointmentId: appointment.id,
@@ -167,13 +223,21 @@ function Appointments() {
 
   useEffect(() => {
     getAppointments();
+    getPatients();
   }, [paginatedParams]);
+
+  console.log({ createAppointment });
 
   return (
     <>
       <Modal
-        open={modalOptions.open}
-        onClose={() => setModalOptions({ ...modalOptions, open: false })}
+        open={descriptionModalOptions.open}
+        onClose={() =>
+          setDescriptionModalOptions({
+            ...descriptionModalOptions,
+            open: false,
+          })
+        }
       >
         <ModalContainer>
           <h2>Adicione uma descrição (opcional)</h2>
@@ -181,10 +245,13 @@ function Appointments() {
             onSubmit={async (e) => {
               e.preventDefault();
 
-              if (modalOptions.status && modalOptions.appointmentId) {
+              if (
+                descriptionModalOptions.status &&
+                descriptionModalOptions.appointmentId
+              ) {
                 await markAppointmentAsStatus(
-                  modalOptions.appointmentId,
-                  modalOptions.status
+                  descriptionModalOptions.appointmentId,
+                  descriptionModalOptions.status
                 );
               }
             }}
@@ -197,6 +264,115 @@ function Appointments() {
               onChange={(e) => {
                 setDescription(e.target.value);
               }}
+            />
+            <Button text="CONCLUÍDO" width="200px" height="50px" />
+          </DescriptionForm>
+        </ModalContainer>
+      </Modal>
+      <Modal
+        open={updateModalOptions.open}
+        onClose={() =>
+          setUpdateModalOptions({ ...updateModalOptions, open: false })
+        }
+      >
+        <ModalContainer>
+          <h2>Atualizar consulta</h2>
+          <DescriptionForm
+            onSubmit={async (e) => {
+              e.preventDefault();
+              await updateAppointment();
+            }}
+          >
+            <Input
+              placeholder={appointment?.description || "Descrição"}
+              width="70%"
+              height="50px"
+              type="text"
+              value={appointment?.description || ""}
+              onChange={(e) => {
+                if (appointment) {
+                  setAppointment({
+                    ...appointment,
+                    description: e.target.value,
+                  });
+                }
+              }}
+            />
+            <Select
+              height="50px"
+              width="50%"
+              disabled={
+                ![
+                  AppointmentStatus.PENDING_DONE,
+                  AppointmentStatus.SCHEDULED,
+                ].includes(appointment?.initialStatus!)
+              }
+              onChange={(e) => {
+                if (appointment) {
+                  console.log({
+                    value: e.target.value,
+                    reverse: AppointmentStatusReverseMap.get(e.target.value),
+                  });
+
+                  setAppointment({
+                    ...appointment,
+                    status: AppointmentStatusReverseMap.get(
+                      e.target.value
+                    ) as AppointmentStatus,
+                  });
+                }
+              }}
+              options={[
+                ...(appointment
+                  ? [
+                      {
+                        value:
+                          AppointmentStatusMap.get(
+                            appointment.initialStatus!
+                          ) || "",
+                        id: "",
+                      },
+                    ]
+                  : []),
+                ...[AppointmentStatus.CANCELED, AppointmentStatus.DONE].map(
+                  (status) => ({
+                    value: AppointmentStatusMap.get(status) || "",
+                    id: "",
+                  })
+                ),
+              ]}
+              value={
+                appointment ? AppointmentStatusMap.get(appointment.status!) : ""
+              }
+            />
+            <Button text="CONCLUÍDO" width="200px" height="50px" />
+          </DescriptionForm>
+        </ModalContainer>
+      </Modal>
+      <Modal open={createModalOpen} onClose={() => setCreateModalOpen(false)}>
+        <ModalContainer>
+          <h2>Criar consulta</h2>
+          <DescriptionForm
+            onSubmit={async (e) => {
+              e.preventDefault();
+              await updateAppointment();
+            }}
+          >
+            <Select
+              height="50px"
+              width="50%"
+              onChange={(e) => {
+                console.log(e.target.id);
+
+                setCreateAppointment({
+                  ...createAppointment,
+                  patientId: e.target.id,
+                });
+              }}
+              options={patients.map((patient) => ({
+                value: patient.name,
+                id: patient.id!,
+              }))}
             />
             <Button text="CONCLUÍDO" width="200px" height="50px" />
           </DescriptionForm>
@@ -231,6 +407,9 @@ function Appointments() {
         </Box>
       ) : (
         <PatientsSearchContainer>
+          <CreatePatientButton onClick={() => setCreateModalOpen(true)}>
+            ADICIONAR CONSULTA
+          </CreatePatientButton>
           <Search
             onChange={(e) => {
               const value = e.target.value;
@@ -249,9 +428,11 @@ function Appointments() {
           <PatientsContainer>
             <PatientCardContainer>
               {appointments.map((appointment: AppointmentEntity) => (
-                <PatientCard key={appointment.id}>
+                <AppointmentCard key={appointment.id}>
                   <PatientName>
-                    {abbreviateName(appointment.Patient.name)}
+                    {session.isDoctor()
+                      ? abbreviateName(appointment.Patient.name)
+                      : abbreviateName(appointment.Doctor.name)}
                   </PatientName>
                   <Status status={appointment.status}>
                     {AppointmentStatusMap.get(appointment.status)}
@@ -261,8 +442,21 @@ function Appointments() {
                       {formatRelativeDate(DateTime.fromISO(appointment.date!))}
                     </RelativeDate>
                     {handleOptions(appointment)}
+                    <MuiVisibility
+                      fontSize="medium"
+                      sx={{
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        setAppointment({
+                          ...appointment,
+                          initialStatus: appointment.status,
+                        });
+                        setUpdateModalOptions({ open: true });
+                      }}
+                    />
                   </DateContainer>
-                </PatientCard>
+                </AppointmentCard>
               ))}
             </PatientCardContainer>
           </PatientsContainer>
