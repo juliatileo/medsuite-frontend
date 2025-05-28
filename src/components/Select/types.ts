@@ -6,4 +6,5 @@ export interface SelectProps {
   center?: string;
   value?: string;
   disabled?: boolean;
+  setId?: React.Dispatch<React.SetStateAction<string>>;
 }

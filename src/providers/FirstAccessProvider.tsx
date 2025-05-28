@@ -14,8 +14,6 @@ const FirstAccessContext = createContext<FirstAccessContextType | undefined>(
 export const FirstAccessProvider = ({ children }: { children: ReactNode }) => {
   const [isFirstAccess, setFirstAccess] = useState(session.isFirstAccess());
 
-  console.log({ isFirstAccess, session: session.isFirstAccess() });
-
   return (
     <FirstAccessContext.Provider value={{ isFirstAccess, setFirstAccess }}>
       {children}

@@ -55,11 +55,6 @@ function Login(): JSX.Element {
       navigate("/", { replace: true });
     } catch (err) {
       if (err instanceof AxiosError) {
-        console.log({
-          notFound: err.response?.data.message === "User not found",
-          incorrect: err.response?.data.message === "Incorrect password",
-        });
-
         if (err.response?.data.message === "User not found") {
           setSnackBarProps({
             open: true,

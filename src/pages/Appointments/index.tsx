@@ -47,6 +47,7 @@ import {
 import Select from "components/Select";
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
+import { nextValidTime } from "utils/nextValidTime";
 
 function Appointments() {
   const user = session.getUserInfo();
@@ -82,15 +83,15 @@ function Appointments() {
     null
   );
   const [createAppointment, setCreateAppointment] = useState<AppointmentEntity>(
-    {} as AppointmentEntity
+    { date: nextValidTime().toISO() } as AppointmentEntity
   );
-  const [value, setValue] = useState<DateTime | null>(DateTime.now());
+  const [patientId, setPatientId] = useState<string>("");
+  const [patientName, setPatientName] = useState<string>("");
 
   async function getAppointments() {
     const response = await api.getAppointmentsPaginated(paginatedParams);
 
     setAppointments(response.data);
-    setLoading(false);
   }
 
   async function markAppointmentAsStatus(
@@ -152,8 +153,44 @@ function Appointments() {
     const res = await api.listPatients();
 
     setPatients(res.data);
+    setPatientId(res.data[0]?.id || "");
+  }
 
-    setLoading(false);
+  async function createAppointmentHandler() {
+    console.log({ ...createAppointment, patientId });
+
+    if (patientId && createAppointment.date) {
+      try {
+        await api.saveAppointment({
+          ...createAppointment,
+          patientId,
+          doctorId: user?.id,
+          description: "",
+          status: AppointmentStatus.SCHEDULED,
+        });
+
+        setCreateModalOpen(false);
+        setCreateAppointment({} as AppointmentEntity);
+        setSnackBarProps({
+          open: true,
+          message: "Consulta criada com sucesso!",
+          severity: "success",
+        });
+        await getAppointments();
+      } catch {
+        setSnackBarProps({
+          open: true,
+          message: "Ocorreu um erro inesperado. Tente novamente.",
+          severity: "error",
+        });
+      }
+    } else {
+      setSnackBarProps({
+        open: true,
+        message: "Preencha todos os campos obrigatórios.",
+        severity: "warning",
+      });
+    }
   }
 
   function handleOptions(appointment: AppointmentEntity): JSX.Element {
@@ -227,14 +264,9 @@ function Appointments() {
   useEffect(() => {
     getAppointments();
     getPatients();
-  }, [paginatedParams]);
 
-  console.log(
-    patients.map((patient) => ({
-      value: patient.name,
-      id: patient.id!,
-    }))
-  );
+    setLoading(false);
+  }, [paginatedParams]);
 
   return (
     <>
@@ -317,11 +349,6 @@ function Appointments() {
               }
               onChange={(e) => {
                 if (appointment) {
-                  console.log({
-                    value: e.target.value,
-                    reverse: AppointmentStatusReverseMap.get(e.target.value),
-                  });
-
                   setAppointment({
                     ...appointment,
                     status: AppointmentStatusReverseMap.get(
@@ -369,27 +396,44 @@ function Appointments() {
             <Select
               height="50px"
               width="50%"
+              value={patientName}
+              setId={setPatientId}
               onChange={(e) => {
-                console.log(e.target.id);
-
-                setCreateAppointment({
-                  ...createAppointment,
-                  patientId: e.target.id,
-                });
+                setPatientName(e.target.value);
               }}
               options={patients.map((patient) => ({
-                value: patient.name,
                 id: patient.id!,
+                value: patient.name,
               }))}
             />
             <LocalizationProvider dateAdapter={AdapterLuxon}>
               <DateTimePicker
-                label="Controlled picker"
-                value={value}
-                onChange={(newValue) => setValue(newValue)}
+                label="Data da consulta"
+                sx={{
+                  borderRadius: "0",
+                }}
+                value={
+                  DateTime.fromISO(createAppointment.date).isValid
+                    ? DateTime.fromISO(createAppointment.date)
+                    : nextValidTime()
+                }
+                onChange={(value) =>
+                  setCreateAppointment({
+                    ...createAppointment,
+                    date: value?.toISO() || "",
+                  })
+                }
+                disablePast={true}
+                ampm={false}
+                minutesStep={30}
               />
             </LocalizationProvider>
-            <Button text="CONCLUÍDO" width="200px" height="50px" />
+            <Button
+              text="CONCLUÍDO"
+              width="200px"
+              height="50px"
+              onClick={createAppointmentHandler}
+            />
           </DescriptionForm>
         </ModalContainer>
       </Modal>
