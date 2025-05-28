@@ -45,6 +45,8 @@ import {
   AppointmentCard,
 } from "./styles";
 import Select from "components/Select";
+import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 
 function Appointments() {
   const user = session.getUserInfo();
@@ -82,6 +84,7 @@ function Appointments() {
   const [createAppointment, setCreateAppointment] = useState<AppointmentEntity>(
     {} as AppointmentEntity
   );
+  const [value, setValue] = useState<DateTime | null>(DateTime.now());
 
   async function getAppointments() {
     const response = await api.getAppointmentsPaginated(paginatedParams);
@@ -226,7 +229,12 @@ function Appointments() {
     getPatients();
   }, [paginatedParams]);
 
-  console.log({ createAppointment });
+  console.log(
+    patients.map((patient) => ({
+      value: patient.name,
+      id: patient.id!,
+    }))
+  );
 
   return (
     <>
@@ -374,6 +382,13 @@ function Appointments() {
                 id: patient.id!,
               }))}
             />
+            <LocalizationProvider dateAdapter={AdapterLuxon}>
+              <DateTimePicker
+                label="Controlled picker"
+                value={value}
+                onChange={(newValue) => setValue(newValue)}
+              />
+            </LocalizationProvider>
             <Button text="CONCLUÍDO" width="200px" height="50px" />
           </DescriptionForm>
         </ModalContainer>
