@@ -6,7 +6,7 @@ import {
   LocalizationProvider,
   PickersDay,
 } from "@mui/x-date-pickers";
-import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
+
 import { Tooltip, Typography, Skeleton, Box } from "@mui/material";
 import { ptBR } from "@mui/x-date-pickers/locales";
 
@@ -16,6 +16,7 @@ import session from "config/session";
 import { AppointmentEntity, UserEntity } from "config/api/dto";
 
 import { CalendarContainer } from "./styles";
+import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 
 function Home() {
   const [appointments, setAppointments] = useState<AppointmentEntity[]>([]);

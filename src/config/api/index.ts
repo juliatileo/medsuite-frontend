@@ -9,6 +9,7 @@ import {
   LoginParams,
   LoginResponse,
   UserEntity,
+  UserType,
 } from "./dto";
 import { DateTime } from "luxon";
 import { formatParams } from "utils/formatParams";
@@ -51,8 +52,8 @@ class API {
     return this.api.put("user", body);
   }
 
-  async listPatients(): Promise<AxiosResponse<UserEntity[]>> {
-    return this.api.get("user/patients");
+  async listByType(type: UserType): Promise<AxiosResponse<UserEntity[]>> {
+    return this.api.get("user/list-by-type", { params: { type } });
   }
 
   async getUsersPaginated(

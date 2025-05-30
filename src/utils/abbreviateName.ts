@@ -8,8 +8,9 @@ export function abbreviateName(fullName: string): string {
   const lastName = parts[parts.length - 1];
   const middleParts = parts.slice(1, -1);
 
-  const abbreviatedMiddle = middleParts.map((word) => {
+  const abbreviatedMiddle = middleParts.map((word = "") => {
     const lower = word.toLowerCase();
+
     if (particles.includes(lower)) {
       return word;
     } else {

@@ -5,7 +5,7 @@ import {
   Clear as MuiX,
   Visibility as MuiVisibility,
 } from "@mui/icons-material";
-import { DateTime } from "luxon";
+import { DateTime, Settings } from "luxon";
 
 import api from "config/api";
 import session from "config/session";
@@ -16,6 +16,7 @@ import {
   AppointmentStatusReverseMap,
   IAppointmentSearchParameters,
   UserEntity,
+  UserType,
 } from "config/api/dto";
 
 import { abbreviateName } from "utils/abbreviateName";
@@ -58,7 +59,7 @@ function Appointments() {
       [field]: user ? user.id : undefined,
     });
   const [appointments, setAppointments] = useState<AppointmentEntity[]>([]);
-  const [patients, setPatients] = useState<UserEntity[]>([]);
+  const [users, setUsers] = useState<UserEntity[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [snackBarProps, setSnackBarProps] = useState<ISnackBarParams>({
     open: false,
@@ -82,10 +83,14 @@ function Appointments() {
   const [appointment, setAppointment] = useState<AppointmentEntity | null>(
     null
   );
+  const [currentUserAppointmentsTime, setCurrentUserAppointmentsTime] =
+    useState<string[]>([]);
   const [createAppointment, setCreateAppointment] = useState<AppointmentEntity>(
-    { date: nextValidTime().toISO() } as AppointmentEntity
+    {
+      date: nextValidTime(currentUserAppointmentsTime).toISO(),
+    } as AppointmentEntity
   );
-  const [patientId, setPatientId] = useState<string>("");
+  const [userId, setUserId] = useState<string>("");
   const [patientName, setPatientName] = useState<string>("");
 
   async function getAppointments() {
@@ -149,22 +154,26 @@ function Appointments() {
     }
   }
 
-  async function getPatients() {
-    const res = await api.listPatients();
+  async function getUsers() {
+    const type = session.isDoctor() ? UserType.PATIENT : UserType.DOCTOR;
 
-    setPatients(res.data);
-    setPatientId(res.data[0]?.id || "");
+    const res = await api.listByType(type);
+
+    setUsers(res.data);
+    setUserId(res.data[0]?.id || "");
   }
 
   async function createAppointmentHandler() {
-    console.log({ ...createAppointment, patientId });
-
-    if (patientId && createAppointment.date) {
+    if (userId && createAppointment.date) {
       try {
+        const saveAppointmentParams: Partial<AppointmentEntity> =
+          session.isDoctor()
+            ? { patientId: userId, doctorId: user?.id }
+            : { doctorId: userId, patientId: user?.id };
+
         await api.saveAppointment({
           ...createAppointment,
-          patientId,
-          doctorId: user?.id,
+          ...saveAppointmentParams,
           description: "",
           status: AppointmentStatus.SCHEDULED,
         });
@@ -261,12 +270,30 @@ function Appointments() {
     }
   }
 
+  function handleNextValidTime(): DateTime {
+    return DateTime.fromISO(createAppointment.date).isValid
+      ? DateTime.fromISO(createAppointment.date)
+      : nextValidTime(currentUserAppointmentsTime);
+  }
+
   useEffect(() => {
     getAppointments();
-    getPatients();
+    getUsers();
 
     setLoading(false);
   }, [paginatedParams]);
+
+  useEffect(() => {
+    const newCurrentUserAppointmentsTime = appointments
+      .filter((appointment) => {
+        const field = session.isDoctor() ? "patientId" : "doctorId";
+
+        return appointment[field] === userId;
+      })
+      .map((appointment) => DateTime.fromISO(appointment.date!).toISO()!);
+
+    setCurrentUserAppointmentsTime(newCurrentUserAppointmentsTime);
+  }, [appointments, userId]);
 
   return (
     <>
@@ -397,13 +424,13 @@ function Appointments() {
               height="50px"
               width="50%"
               value={patientName}
-              setId={setPatientId}
+              setId={setUserId}
               onChange={(e) => {
                 setPatientName(e.target.value);
               }}
-              options={patients.map((patient) => ({
-                id: patient.id!,
-                value: patient.name,
+              options={users.map((user) => ({
+                id: user.id!,
+                value: user.name,
               }))}
             />
             <LocalizationProvider dateAdapter={AdapterLuxon}>
@@ -412,11 +439,7 @@ function Appointments() {
                 sx={{
                   borderRadius: "0",
                 }}
-                value={
-                  DateTime.fromISO(createAppointment.date).isValid
-                    ? DateTime.fromISO(createAppointment.date)
-                    : nextValidTime()
-                }
+                value={handleNextValidTime()}
                 onChange={(value) =>
                   setCreateAppointment({
                     ...createAppointment,
@@ -424,6 +447,35 @@ function Appointments() {
                   })
                 }
                 disablePast={true}
+                shouldDisableDate={(date) => {
+                  Settings.defaultLocale = "en-US";
+                  const weekday = date.weekday;
+                  return weekday === 6 || weekday === 7;
+                }}
+                shouldDisableTime={(date, clockType) => {
+                  const { hour } = date;
+
+                  const currentUserAppointmentsTime = appointments
+                    .filter((appointment) => {
+                      const field = session.isDoctor()
+                        ? "patientId"
+                        : "doctorId";
+
+                      return appointment[field] === userId;
+                    })
+                    .map((appointment) =>
+                      DateTime.fromISO(appointment.date!).toISO()
+                    );
+
+                  if (clockType === "hours") {
+                    return (
+                      hour < 8 ||
+                      hour >= 18 ||
+                      currentUserAppointmentsTime.includes(date.toISO() || "")
+                    );
+                  }
+                  return false;
+                }}
                 ampm={false}
                 minutesStep={30}
               />
@@ -501,19 +553,23 @@ function Appointments() {
                       {formatRelativeDate(DateTime.fromISO(appointment.date!))}
                     </RelativeDate>
                     {handleOptions(appointment)}
-                    <MuiVisibility
-                      fontSize="medium"
-                      sx={{
-                        cursor: "pointer",
-                      }}
-                      onClick={() => {
-                        setAppointment({
-                          ...appointment,
-                          initialStatus: appointment.status,
-                        });
-                        setUpdateModalOptions({ open: true });
-                      }}
-                    />
+                    {session.isDoctor() ? (
+                      <MuiVisibility
+                        fontSize="medium"
+                        sx={{
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          setAppointment({
+                            ...appointment,
+                            initialStatus: appointment.status,
+                          });
+                          setUpdateModalOptions({ open: true });
+                        }}
+                      />
+                    ) : (
+                      <></>
+                    )}
                   </DateContainer>
                 </AppointmentCard>
               ))}
