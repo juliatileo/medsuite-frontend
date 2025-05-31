@@ -13,4 +13,14 @@ export default defineConfig({
       providers: "/src/providers",
     },
   },
+  preview: {
+    port: 8080,
+    strictPort: true,
+  },
+  server: {
+    port: 8080,
+    strictPort: true,
+    host: true,
+    origin: "http://localhost:8080",
+  },
 });
