@@ -85,9 +85,10 @@ function Appointments() {
   );
   const [currentUserAppointmentsTime, setCurrentUserAppointmentsTime] =
     useState<string[]>([]);
+  const [nextValidTimeState, setNextValidTimeState] = useState<DateTime>();
   const [createAppointment, setCreateAppointment] = useState<AppointmentEntity>(
     {
-      date: nextValidTime(currentUserAppointmentsTime).toISO(),
+      date: nextValidTimeState?.toISO(),
     } as AppointmentEntity
   );
   const [userId, setUserId] = useState<string>("");
@@ -164,6 +165,10 @@ function Appointments() {
   }
 
   async function createAppointmentHandler() {
+    createAppointment.date = createAppointment?.date
+      ? createAppointment.date
+      : nextValidTimeState?.toISO() || "";
+
     if (userId && createAppointment.date) {
       try {
         const saveAppointmentParams: Partial<AppointmentEntity> =
@@ -270,12 +275,6 @@ function Appointments() {
     }
   }
 
-  function handleNextValidTime(): DateTime {
-    return DateTime.fromISO(createAppointment.date).isValid
-      ? DateTime.fromISO(createAppointment.date)
-      : nextValidTime(currentUserAppointmentsTime);
-  }
-
   useEffect(() => {
     getAppointments();
     getUsers();
@@ -294,6 +293,10 @@ function Appointments() {
 
     setCurrentUserAppointmentsTime(newCurrentUserAppointmentsTime);
   }, [appointments, userId]);
+
+  useEffect(() => {
+    setNextValidTimeState(nextValidTime(currentUserAppointmentsTime));
+  }, [createAppointment, currentUserAppointmentsTime]);
 
   return (
     <>
@@ -439,7 +442,7 @@ function Appointments() {
                 sx={{
                   borderRadius: "0",
                 }}
-                value={handleNextValidTime()}
+                value={nextValidTimeState || null}
                 onChange={(value) =>
                   setCreateAppointment({
                     ...createAppointment,
@@ -453,33 +456,29 @@ function Appointments() {
                   return weekday === 6 || weekday === 7;
                 }}
                 shouldDisableTime={(date, clockType) => {
-                  const { hour } = date;
-
                   const currentUserAppointmentsTime = appointments
                     .filter((appointment) => {
                       const field = session.isDoctor()
                         ? "patientId"
                         : "doctorId";
-
                       return appointment[field] === userId;
                     })
                     .map((appointment) =>
                       DateTime.fromISO(appointment.date!).toISO()
                     );
 
-                  console.log({
-                    currentUserAppointmentsTime,
-                    isoDate: date.toISO(),
-                    condition: currentUserAppointmentsTime.includes(
-                      date.toISO() || ""
-                    ),
-                  });
+                  if (clockType === "hours")
+                    return date.hour < 8 || date.hour >= 18;
 
-                  if (clockType === "hours") {
-                    return (
-                      hour < 8 ||
-                      hour >= 18 ||
-                      currentUserAppointmentsTime.includes(date.toISO() || "")
+                  if (clockType === "minutes") {
+                    const slotISO = date
+                      .set({ second: 0, millisecond: 0 })
+                      .toISO();
+                    return currentUserAppointmentsTime.some(
+                      (apptISO) =>
+                        DateTime.fromISO(apptISO || "")
+                          .set({ second: 0, millisecond: 0 })
+                          .toISO() === slotISO
                     );
                   }
                   return false;

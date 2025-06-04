@@ -4,8 +4,6 @@ export function nextValidTime(appointmentsTime: string[]): DateTime {
   const now = DateTime.now();
   let next: DateTime;
 
-  console.log({ appointmentsTime });
-
   if (now.minute < 30)
     next = now.set({ minute: 30, second: 0, millisecond: 0 });
   else
