@@ -58,7 +58,7 @@ function Home() {
     const descriptions = appointmentsForDay
       .map(
         (appointment) =>
-          `${appointment.description} às ${DateTime.fromISO(
+          `${appointment.description || "Consulta"} às ${DateTime.fromISO(
             appointment.date
           ).toFormat("HH:mm")}`
       )

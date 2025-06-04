@@ -467,6 +467,14 @@ function Appointments() {
                       DateTime.fromISO(appointment.date!).toISO()
                     );
 
+                  console.log({
+                    currentUserAppointmentsTime,
+                    isoDate: date.toISO(),
+                    condition: currentUserAppointmentsTime.includes(
+                      date.toISO() || ""
+                    ),
+                  });
+
                   if (clockType === "hours") {
                     return (
                       hour < 8 ||

@@ -12,9 +12,7 @@ export function nextValidTime(appointmentsTime: string[]): DateTime {
     next = now.plus({ hours: 1 }).set({ minute: 0, second: 0, millisecond: 0 });
 
   const isOccupied = (dt: DateTime) =>
-    appointmentsTime?.some(
-      (time) => DateTime.fromISO(time).toMillis() === dt.toMillis()
-    );
+    appointmentsTime?.some((time) => time === dt.toISO());
 
   while (
     next.weekday > 5 ||
