@@ -87,9 +87,7 @@ function Appointments() {
     useState<string[]>([]);
   const [nextValidTimeState, setNextValidTimeState] = useState<DateTime>();
   const [createAppointment, setCreateAppointment] = useState<AppointmentEntity>(
-    {
-      date: nextValidTimeState?.toISO(),
-    } as AppointmentEntity
+    {} as AppointmentEntity
   );
   const [userId, setUserId] = useState<string>("");
   const [patientName, setPatientName] = useState<string>("");
@@ -298,6 +296,8 @@ function Appointments() {
     setNextValidTimeState(nextValidTime(currentUserAppointmentsTime));
   }, [createAppointment, currentUserAppointmentsTime]);
 
+  console.log({ createAppointment });
+
   return (
     <>
       <Modal
@@ -442,7 +442,11 @@ function Appointments() {
                 sx={{
                   borderRadius: "0",
                 }}
-                value={nextValidTimeState || null}
+                value={
+                  DateTime.fromISO(createAppointment.date).isValid
+                    ? DateTime.fromISO(createAppointment.date)
+                    : nextValidTimeState || null
+                }
                 onChange={(value) =>
                   setCreateAppointment({
                     ...createAppointment,
