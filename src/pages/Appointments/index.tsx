@@ -296,8 +296,6 @@ function Appointments() {
     setNextValidTimeState(nextValidTime(currentUserAppointmentsTime));
   }, [createAppointment, currentUserAppointmentsTime]);
 
-  console.log({ createAppointment });
-
   return (
     <>
       <Modal
