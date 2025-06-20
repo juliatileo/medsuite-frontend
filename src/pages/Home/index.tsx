@@ -15,7 +15,7 @@ import api from "config/api";
 import session from "config/session";
 import { AppointmentEntity, UserEntity } from "config/api/dto";
 
-import { CalendarContainer } from "./styles";
+import { Card, CardContent, CardsContainer, CardTitle } from "./styles";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 
 function Home() {
@@ -132,22 +132,50 @@ function Home() {
           <Skeleton variant="text" width={200} />
         </Box>
       ) : (
-        <LocalizationProvider
-          dateAdapter={AdapterLuxon}
-          localeText={
-            ptBR.components.MuiLocalizationProvider.defaultProps.localeText
-          }
-        >
-          <CalendarContainer>
-            <DateCalendar
-              slots={{
-                day: CustomDay,
-              }}
-              readOnly
-              sx={{ margin: 0, backgroundColor: "#F6F6F6" }}
-            />
-          </CalendarContainer>
-        </LocalizationProvider>
+        <CardsContainer>
+          <Card>
+            <CardTitle>Calendário de consultas</CardTitle>
+            <LocalizationProvider
+              dateAdapter={AdapterLuxon}
+              localeText={
+                ptBR.components.MuiLocalizationProvider.defaultProps.localeText
+              }
+            >
+              <DateCalendar
+                slots={{
+                  day: CustomDay,
+                }}
+                readOnly
+                sx={{ margin: 0, backgroundColor: "#F6F6F6" }}
+              />
+            </LocalizationProvider>
+          </Card>
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              flexDirection: "row",
+              backgroundColor: "red",
+            }}
+          >
+            <Card style={{ width: "180px" }}>
+              <CardTitle>Pacientes cadastrados</CardTitle>
+              <CardContent>18</CardContent>
+            </Card>
+            <Card style={{ width: "180px" }}>
+              <CardTitle>Consultas concluídas</CardTitle>
+              <CardContent>187</CardContent>
+            </Card>
+            <Card style={{ width: "180px" }}>
+              <CardTitle>Consultas pendentes</CardTitle>
+              <CardContent>11</CardContent>
+            </Card>
+            <Card style={{ width: "180px" }}>
+              <CardTitle>Consultas hoje</CardTitle>
+              <CardContent>3</CardContent>
+            </Card>
+          </div>
+        </CardsContainer>
       )}
     </>
   );
