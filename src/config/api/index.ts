@@ -85,6 +85,17 @@ class API {
     return this.api.put("user", { id, deletedAt: new Date() });
   }
 
+  async getDashboard(userId: string): Promise<
+    AxiosResponse<{
+      totalUsers: number;
+      concludedAppointments: number;
+      pendingAppointments: number;
+      todayAppointments: number;
+    }>
+  > {
+    return this.api.get(`user/dashboard/${userId}`);
+  }
+
   // APPOINTMENT
   async saveAppointment(
     body: Partial<AppointmentEntity>

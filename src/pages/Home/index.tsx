@@ -15,18 +15,31 @@ import api from "config/api";
 import session from "config/session";
 import { AppointmentEntity, UserEntity } from "config/api/dto";
 
-import { Card, CardContent, CardsContainer, CardTitle } from "./styles";
+import {
+  Card,
+  CardContent,
+  CardsContainer,
+  CardTitle,
+  SmallCardContainer,
+} from "./styles";
 import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
 
 function Home() {
+  const user = session.getUserInfo() as UserEntity;
+
   const [appointments, setAppointments] = useState<AppointmentEntity[]>([]);
-
-  const [user, setUser] = useState<UserEntity | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    setUser(session.getUserInfo() as UserEntity);
-  }, []);
+  const [dashboard, setDashboard] = useState<{
+    totalUsers: number;
+    concludedAppointments: number;
+    pendingAppointments: number;
+    todayAppointments: number;
+  }>({
+    totalUsers: 0,
+    concludedAppointments: 0,
+    pendingAppointments: 0,
+    todayAppointments: 0,
+  });
 
   useEffect(() => {
     async function getAppointments() {
@@ -38,13 +51,22 @@ function Home() {
         const res = await appointmentGetFunction;
 
         setAppointments(res.data);
-
-        setLoading(false);
       }
     }
 
+    async function getDashboard() {
+      if (user && user.id) {
+        const res = await api.getDashboard(user.id);
+
+        setDashboard(res.data);
+      }
+    }
+
+    getDashboard();
     getAppointments();
-  }, [user]);
+
+    setLoading(false);
+  }, []);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const CustomDay = ({ day, selectedDate, ...pickersDayProps }: any) => {
@@ -150,31 +172,28 @@ function Home() {
               />
             </LocalizationProvider>
           </Card>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              flexDirection: "row",
-              backgroundColor: "red",
-            }}
-          >
-            <Card style={{ width: "180px" }}>
-              <CardTitle>Pacientes cadastrados</CardTitle>
-              <CardContent>18</CardContent>
+          <SmallCardContainer>
+            <Card>
+              <CardTitle>
+                {session.isDoctor()
+                  ? "Pacientes cadastrados"
+                  : "Doutores disponíveis"}{" "}
+              </CardTitle>
+              <CardContent>{dashboard.totalUsers}</CardContent>
             </Card>
-            <Card style={{ width: "180px" }}>
+            <Card>
               <CardTitle>Consultas concluídas</CardTitle>
-              <CardContent>187</CardContent>
+              <CardContent>{dashboard.concludedAppointments}</CardContent>
             </Card>
-            <Card style={{ width: "180px" }}>
+            <Card>
               <CardTitle>Consultas pendentes</CardTitle>
-              <CardContent>11</CardContent>
+              <CardContent>{dashboard.pendingAppointments}</CardContent>
             </Card>
-            <Card style={{ width: "180px" }}>
+            <Card>
               <CardTitle>Consultas hoje</CardTitle>
-              <CardContent>3</CardContent>
+              <CardContent>{dashboard.todayAppointments}</CardContent>
             </Card>
-          </div>
+          </SmallCardContainer>
         </CardsContainer>
       )}
     </>
