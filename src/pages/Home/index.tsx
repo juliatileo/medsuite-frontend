@@ -32,11 +32,15 @@ function Home() {
   const [dashboard, setDashboard] = useState<{
     totalUsers: number;
     concludedAppointments: number;
+    scheduledAppointments: number;
+    canceledAppointments: number;
     pendingAppointments: number;
     todayAppointments: number;
   }>({
     totalUsers: 0,
     concludedAppointments: 0,
+    scheduledAppointments: 0,
+    canceledAppointments: 0,
     pendingAppointments: 0,
     todayAppointments: 0,
   });
@@ -188,6 +192,14 @@ function Home() {
             <Card>
               <CardTitle>Consultas pendentes</CardTitle>
               <CardContent>{dashboard.pendingAppointments}</CardContent>
+            </Card>
+            <Card>
+              <CardTitle>Consultas agendadas</CardTitle>
+              <CardContent>{dashboard.scheduledAppointments}</CardContent>
+            </Card>
+            <Card>
+              <CardTitle>Consultas canceladas</CardTitle>
+              <CardContent>{dashboard.canceledAppointments}</CardContent>
             </Card>
             <Card>
               <CardTitle>Consultas hoje</CardTitle>

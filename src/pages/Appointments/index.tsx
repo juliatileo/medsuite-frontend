@@ -158,6 +158,8 @@ function Appointments() {
 
     const res = await api.listByType(type);
 
+    console.log(res.data);
+
     setUsers(res.data);
     setUserId(res.data[0]?.id || "");
   }
@@ -281,13 +283,9 @@ function Appointments() {
   }, [paginatedParams]);
 
   useEffect(() => {
-    const newCurrentUserAppointmentsTime = appointments
-      .filter((appointment) => {
-        const field = session.isDoctor() ? "patientId" : "doctorId";
-
-        return appointment[field] === userId;
-      })
-      .map((appointment) => DateTime.fromISO(appointment.date!).toISO()!);
+    const newCurrentUserAppointmentsTime = appointments.map(
+      (appointment) => DateTime.fromISO(appointment.date!).toISO()!
+    );
 
     setCurrentUserAppointmentsTime(newCurrentUserAppointmentsTime);
   }, [appointments, userId]);
@@ -463,6 +461,7 @@ function Appointments() {
                       const field = session.isDoctor()
                         ? "patientId"
                         : "doctorId";
+
                       return appointment[field] === userId;
                     })
                     .map((appointment) =>
