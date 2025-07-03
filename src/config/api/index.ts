@@ -88,6 +88,8 @@ class API {
   async getDashboard(userId: string): Promise<
     AxiosResponse<{
       totalUsers: number;
+      scheduledAppointments: number;
+      canceledAppointments: number;
       concludedAppointments: number;
       pendingAppointments: number;
       todayAppointments: number;
